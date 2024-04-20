@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+        <listEntry value="/cookbook_server/src/edu/sb/cookbook/check/PersistenceSanityCheckApp.java"/>
+    </listAttribute>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+        <listEntry value="1"/>
+    </listAttribute>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE" value="true"/>
+    <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="edu.sb.cookbook.check.PersistenceSanityCheckApp"/>
+    <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="edu.sb.cookbook.server"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="cookbook_server"/>
+</launchConfiguration>
