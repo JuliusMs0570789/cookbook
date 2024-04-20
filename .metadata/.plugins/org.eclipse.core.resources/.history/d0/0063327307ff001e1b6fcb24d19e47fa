@@ -1,0 +1,45 @@
+package edu.sb.cookbook.persistence;
+
+import javax.json.bind.annotation.JsonbProperty;
+import javax.validation.constraints.Size;
+
+public class Address {
+	@Size(max=15)
+	private String postCode;
+	
+	@Size(max=50)
+	private String street;
+	
+	@Size(max=50)
+	private String city;
+	
+	@Size(max=50)
+	private String country;
+	
+	/**
+	 * Returns the postCode.
+	 * @return the postCode, or {@code null} for none
+	 */
+	@JsonbProperty
+	public String getPostcode () {
+		return this.postCode;
+	}
+	
+	/**
+	 * Returns the street.
+	 * @return the street, or {@code null} for none
+	 */
+	@JsonbProperty
+	public String getStreet () {
+		return this.street;
+	}
+	
+	/**
+	 * Returns the city.
+	 * @return the city, or {@code null} for none
+	 */
+	@JsonbProperty
+	public String getCity () {
+		return this.city;
+	}
+}

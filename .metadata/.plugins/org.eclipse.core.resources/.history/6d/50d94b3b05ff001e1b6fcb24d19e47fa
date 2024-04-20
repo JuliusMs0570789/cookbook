@@ -1,0 +1,5 @@
+package edu.sb.cookbook.persistence;
+
+public class Address {
+
+}
