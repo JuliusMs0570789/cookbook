@@ -94,4 +94,55 @@ public class Recipe {
 	public void setIllustrations (final Document[] illustrations) {
 		this.illustrations = illustrations;
 	}
+	
+	/**
+	 * Returns the title.
+	 * @return the title, or {@code null} for none
+	 */
+	@JsonbProperty
+	public String getTitle () {
+		return this.title;
+	}
+	
+	/**
+	 * Sets the title.
+	 * @param title the title, or {@code null} for none
+	 */
+	public void setTitle (final String title) {
+		this.title = title;
+	}
+	
+	/**
+	 * Returns the description.
+	 * @return the description, or {@code null} for none
+	 */
+	@JsonbProperty
+	public String getDescription () {
+		return this.description;
+	}
+	
+	/**
+	 * Sets the description.
+	 * @param description the description, or {@code null} for none
+	 */
+	public void setDescription (final String description) {
+		this.description = description;
+	}
+	
+	/**
+	 * Returns the instruction.
+	 * @return the instruction, or {@code null} for none
+	 */
+	@JsonbProperty
+	public String getInstruction () {
+		return this.instruction;
+	}
+	
+	/**
+	 * Sets the instruction.
+	 * @param instruction the instruction, or {@code null} for none
+	 */
+	public void setInstruction (final String instruction) {
+		this.instruction = instruction;
+	}
 }

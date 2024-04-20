@@ -1,9 +1,9 @@
 INDEX VERSION 1.134+/Users/CeSar/Desktop/MediaProgramming/eclipse-workspace/.metadata/.plugins/org.eclipse.jdt.core
-979233604.index
+2484792237.index
 961720991.index
 2090643463.index
-2484792237.index
 3533327369.index
+1594657113.index
 405838398.index
 1342830165.index
 835526727.index
@@ -14,17 +14,16 @@ INDEX VERSION 1.134+/Users/CeSar/Desktop/MediaProgramming/eclipse-workspace/.met
 364355689.index
 922925734.index
 2640295249.index
-2765354281.index
 1169468413.index
-3561941290.index
-1865797976.index
+2765354281.index
 2256441868.index
+1865797976.index
+3561941290.index
 3970534801.index
 1805492407.index
-2874998092.index
 302498796.index
+2874998092.index
 82295741.index
-3243226798.index
 1273509188.index
 336612564.index
 416529413.index
@@ -37,4 +36,4 @@ INDEX VERSION 1.134+/Users/CeSar/Desktop/MediaProgramming/eclipse-workspace/.met
 1423505599.index
 2544147535.index
 1051618836.index
-1594657113.index
+979233604.index
