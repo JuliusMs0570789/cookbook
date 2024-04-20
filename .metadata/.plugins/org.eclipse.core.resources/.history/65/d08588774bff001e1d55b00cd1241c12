@@ -1,0 +1,32 @@
+package edu.sb.cookbook.persistence;
+
+import java.util.Set;
+
+public class Person {
+	// TODO What needs to be added here?
+	protected String DEFAULT_PASSWORD_HASH;
+	
+	private Document avatar;
+	
+	private Set<Recipe> recipes;
+	
+	private Set<IngredientType> ingredientTypes;
+	
+	private String email;
+	
+	private String passwordHash;
+	
+	static public enum group { USER, ADMIN }
+	
+	private Name name;
+	
+	private Address address;
+	
+	private Set<String> phones;
+	
+	public Person () {
+		this.email = null;
+	}
+	
+	
+}
