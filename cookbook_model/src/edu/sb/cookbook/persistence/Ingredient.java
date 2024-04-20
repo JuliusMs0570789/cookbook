@@ -39,4 +39,13 @@ public class Ingredient {
 	public void setType (final IngredientType type) {
 		this.type = type;
 	}
+	
+	@JsonbProperty
+	public float getAmount () {
+		return this.amount;
+	}
+	
+	public void setAmount (final float amount) {
+		this.amount = amount;
+	}
 }
