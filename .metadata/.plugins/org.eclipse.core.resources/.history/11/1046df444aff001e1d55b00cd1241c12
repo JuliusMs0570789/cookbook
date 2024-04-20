@@ -23,13 +23,8 @@ public class Recipe {
 	}
 	
 	public Recipe() {
-		this.avatar = null;
-		this.owner = null;
-		// TODO: how should Ingredients and Illustrations be initialized?
-		// TODO: how should Category be initialized?
-		this.title = null;
-		this.description = null;
-		this.instruction = null;	
+		avatar = new Document();
+		owner = new Person();
 	}
 	
 	

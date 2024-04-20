@@ -20,7 +20,6 @@ public class Ingredient {
 		// this.recipe = ...;
 		this.type = null;
 		this.amount = 0;
-		// TODO: how can the unit be initialized at first?
 	}
 	
 	@JsonbProperty

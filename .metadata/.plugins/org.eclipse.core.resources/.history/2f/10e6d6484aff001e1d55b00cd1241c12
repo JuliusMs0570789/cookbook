@@ -29,7 +29,8 @@ public class Recipe {
 		// TODO: how should Category be initialized?
 		this.title = null;
 		this.description = null;
-		this.instruction = null;	
+		this.instruction = null;
+		
 	}
 	
 	
