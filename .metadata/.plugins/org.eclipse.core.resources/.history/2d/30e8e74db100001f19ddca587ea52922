@@ -4,7 +4,7 @@ import javax.json.bind.annotation.JsonbProperty;
 import javax.validation.constraints.Size;
 
 
-public class Name implements Comparable<Name> {
+public class Name {
 	@Size(max=10)
 	private String title;
 	
@@ -72,11 +72,5 @@ public class Name implements Comparable<Name> {
 	 */
 	public void setGiven (final String given) {
 		this.given = given;
-	}
-
-	@Override
-	public int compareTo(Name o) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 }
