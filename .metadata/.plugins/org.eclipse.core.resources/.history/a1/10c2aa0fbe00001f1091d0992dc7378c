@@ -19,7 +19,7 @@ public class Recipe extends BaseEntity {
 	
 	private Set<Document> illustrations;
 	
-	private Recipe.Category category;
+	private Recipe.Category;
 	
 	private String title;
 	
@@ -76,14 +76,6 @@ public class Recipe extends BaseEntity {
 	
 	public void setIllustrations (final Set<Document> illustrations) {
 		this.illustrations = illustrations;
-	}
-	
-	public Recipe.Category getCategory() {
-		return this.category;
-	}
-	
-	public void setCategory(Recipe.Category category) {
-		this.category = category;
 	}
 	
 	@JsonbProperty

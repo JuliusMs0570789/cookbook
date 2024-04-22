@@ -78,14 +78,6 @@ public class Recipe extends BaseEntity {
 		this.illustrations = illustrations;
 	}
 	
-	public Recipe.Category getCategory() {
-		return this.category;
-	}
-	
-	public void setCategory(Recipe.Category category) {
-		this.category = category;
-	}
-	
 	@JsonbProperty
 	public String getTitle () {
 		return this.title;

@@ -19,15 +19,13 @@ public class Recipe extends BaseEntity {
 	
 	private Set<Document> illustrations;
 	
-	private Recipe.Category category;
-	
 	private String title;
 	
 	private String description;
 	
 	private String instruction;
 	
-	static public enum Category {
+	static public enum category {
 		MAIN_COURSE, APPETIZER, SNACK, DESSERT, BREAKFAST, BUFFET, BARBEQUE, ADOLESCENT, INFANT		
 	}
 	
@@ -76,14 +74,6 @@ public class Recipe extends BaseEntity {
 	
 	public void setIllustrations (final Set<Document> illustrations) {
 		this.illustrations = illustrations;
-	}
-	
-	public Recipe.Category getCategory() {
-		return this.category;
-	}
-	
-	public void setCategory(Recipe.Category category) {
-		this.category = category;
 	}
 	
 	@JsonbProperty

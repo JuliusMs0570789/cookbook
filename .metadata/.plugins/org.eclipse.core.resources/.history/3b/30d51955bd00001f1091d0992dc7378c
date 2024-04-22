@@ -13,10 +13,13 @@ public class IngredientType extends BaseEntity {
 	
 	public String alias;
 	
-	public Restriction restriction;
+	public IngredientType.Restriction restriction;
 	
 	public String description;
 	
+	static public enum Restriction {
+		NONE, PESCATARIAN, LACTO_OVO_VEGETARIAN, LACTO_VEGETARIAN, VEGAN	
+	}
 	
 	public IngredientType () {
 		this.avatar = null;
@@ -53,11 +56,11 @@ public class IngredientType extends BaseEntity {
 		this.alias = alias;
 	}
 	
-	public Restriction getRestriction() {
+	public IngredientType.Restriction getRestriction() {
 		return this.restriction;
 	}
 	
-	public void setRestriction(Restriction restriction) {
+	public void setRestriction(IngredientType.Restriction restriction) {
 		this.restriction = restriction;
 	}
 	
