@@ -9,11 +9,11 @@ public class IngredientType {
 	
 	public String alias;
 	
-	public IngredientType.Restriction restriction;
+	public IngredientType.restrictions restriction;
 	
 	public String description;
 	
-	static public enum Restriction {
+	static public enum restrictions {
 		NONE, PESCATARIAN, LACTO_OVO_VEGETARIAN, LACTO_VEGETARIAN, VEGAN	
 	}
 	
@@ -21,7 +21,7 @@ public class IngredientType {
 		this.avatar = null;
 		this.owner = null;
 		this.alias = null;
-		this.restriction = Restriction.values()[0];
+		this.restriction = restrictions.values()[0];
 		this.description = null;
 	}
 	
@@ -52,11 +52,11 @@ public class IngredientType {
 		this.alias = alias;
 	}
 	
-	public IngredientType.Restriction getRestriction() {
+	public IngredientType.restrictions getRestriction() {
 		return this.restriction;
 	}
 	
-	public void setRestriction(IngredientType.Restriction restriction) {
+	public void setRestriction(IngredientType.restrictions restriction) {
 		this.restriction = restriction;
 	}
 	

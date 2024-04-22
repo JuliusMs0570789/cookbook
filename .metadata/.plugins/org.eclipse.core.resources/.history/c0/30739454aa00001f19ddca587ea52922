@@ -2,6 +2,8 @@ package edu.sb.cookbook.persistence;
 
 import javax.json.bind.annotation.JsonbProperty;
 
+// TODO: inherits objects
+
 import javax.validation.constraints.Size;
 
 public class Address {

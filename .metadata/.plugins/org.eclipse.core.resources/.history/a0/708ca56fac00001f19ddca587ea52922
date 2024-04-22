@@ -11,17 +11,18 @@ public class Ingredient {
 	
 	private float amount;
 	
-	private Ingredient.Unit unit;
-	
 	static public enum Unit {
 		LITRE, GRAM, TEASPOON, TABLESPOON, PINCH, CUP, CAN, TUBE, BUSHEL, PIECE		
 	}
+	
+	private Ingredient.Unit unit;
 	
 	public Ingredient () {
 		// TODO: how can the recipe be initialized at first?
 		this.unit = Unit.values()[1];
 		this.type = null;
 		this.amount = 0;
+		// TODO: how can the unit be initialized at first?
 	}
 	
 	@JsonbProperty
@@ -49,14 +50,5 @@ public class Ingredient {
 	
 	public void setAmount (final float amount) {
 		this.amount = amount;
-	}
-	
-	@JsonbProperty
-	public Ingredient.Unit getUnit () {
-		return this.unit;
-	}
-	
-	public void setUnit (final Ingredient.Unit unit) {
-		this.unit = unit;
 	}
 }
