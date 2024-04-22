@@ -17,12 +17,13 @@ public class IngredientType {
 		NONE, PESCATARIAN, LACTO_OVO_VEGETARIAN, LACTO_VEGETARIAN, VEGAN	
 	}
 	
+	
 	public IngredientType () {
 		this.avatar = null;
 		this.owner = null;
 		this.alias = null;
-		this.restriction = restrictions.values()[0];
 		this.description = null;
+		this.restriction = restrictions.values()[0];
 	}
 	
 	@JsonbProperty
@@ -52,13 +53,7 @@ public class IngredientType {
 		this.alias = alias;
 	}
 	
-	public IngredientType.restrictions getRestriction() {
-		return this.restriction;
-	}
-	
-	public void setRestriction(IngredientType.restrictions restriction) {
-		this.restriction = restriction;
-	}
+	// TODO: add methods getRestriction and setRestriction
 	
 	@JsonbProperty
 	public String getDescription () {

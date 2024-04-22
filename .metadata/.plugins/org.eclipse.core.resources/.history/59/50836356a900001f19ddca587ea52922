@@ -52,13 +52,7 @@ public class IngredientType {
 		this.alias = alias;
 	}
 	
-	public IngredientType.restrictions getRestriction() {
-		return this.restriction;
-	}
-	
-	public void setRestriction(IngredientType.restrictions restriction) {
-		this.restriction = restriction;
-	}
+	// TODO: add methods getRestriction and setRestriction
 	
 	@JsonbProperty
 	public String getDescription () {

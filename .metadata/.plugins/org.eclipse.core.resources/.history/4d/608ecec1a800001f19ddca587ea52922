@@ -9,19 +9,18 @@ public class IngredientType {
 	
 	public String alias;
 	
-	public IngredientType.restrictions restriction;
+	static public enum restriction {
+		NONE, PESCATARIAN, LACTO_OVO_VEGETARIAN, LACTO_VEGETARIAN, VEGAN	
+	}
 	
 	public String description;
 	
-	static public enum restrictions {
-		NONE, PESCATARIAN, LACTO_OVO_VEGETARIAN, LACTO_VEGETARIAN, VEGAN	
-	}
 	
 	public IngredientType () {
 		this.avatar = null;
 		this.owner = null;
 		this.alias = null;
-		this.restriction = restrictions.values()[0];
+		// TODO: handle restricition
 		this.description = null;
 	}
 	
@@ -52,13 +51,7 @@ public class IngredientType {
 		this.alias = alias;
 	}
 	
-	public IngredientType.restrictions getRestriction() {
-		return this.restriction;
-	}
-	
-	public void setRestriction(IngredientType.restrictions restriction) {
-		this.restriction = restriction;
-	}
+	// TODO: add methods getRestriction and setRestriction
 	
 	@JsonbProperty
 	public String getDescription () {
