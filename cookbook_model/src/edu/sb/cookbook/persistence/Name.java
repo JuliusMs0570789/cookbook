@@ -1,76 +1,89 @@
 package edu.sb.cookbook.persistence;
 
 import javax.json.bind.annotation.JsonbProperty;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
+@Embeddable
+@Table(schema = "cookbook", name = "Name", indexes = {})
+@DiscriminatorValue("Name")
 
 public class Name implements Comparable<Name> {
-	@Size(max=10)
+	@Size(max = 10)
 	private String title;
-	
-	@Size(max=40)
+
+	@Size(max = 40)
 	private String family;
-	
-	@Size(max=40)
+
+	@Size(max = 40)
 	private String given;
-	
+
 	/**
 	 * Initializes a new instance.
 	 */
-	public Name () {
+	public Name() {
 		this.title = null;
 		this.family = null;
 		this.given = null;
 	}
-	
+
 	/**
 	 * Returns the title.
+	 * 
 	 * @return the title, or {@code null} for none
 	 */
 	@JsonbProperty
-	public String getTitle () {
+	public String getTitle() {
 		return this.title;
 	}
-	
+
 	/**
 	 * Sets the title.
+	 * 
 	 * @param title the title, or {@code null} for none
 	 */
-	public void setTitle (final String title) {
+	public void setTitle(final String title) {
 		this.title = title;
 	}
-	
+
 	/**
 	 * Returns the family.
+	 * 
 	 * @return the family, or {@code null} for none
 	 */
 	@JsonbProperty
-	public String getFamily () {
+	public String getFamily() {
 		return this.family;
 	}
-	
+
 	/**
 	 * Sets the family.
+	 * 
 	 * @param family the family, or {@code null} for none
 	 */
-	public void setFamily (final String family) {
+	public void setFamily(final String family) {
 		this.family = family;
 	}
-	
+
 	/**
 	 * Returns the given.
+	 * 
 	 * @return the given, or {@code null} for none
 	 */
 	@JsonbProperty
-	public String getGiven () {
+	public String getGiven() {
 		return this.given;
 	}
-	
+
 	/**
 	 * Sets the given.
+	 * 
 	 * @param given the given, or {@code null} for none
 	 */
-	public void setGiven (final String given) {
+	public void setGiven(final String given) {
 		this.given = given;
 	}
 

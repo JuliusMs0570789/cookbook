@@ -35,7 +35,6 @@ public abstract class BaseEntity implements Comparable<BaseEntity> {
 	@PositiveOrZero
 	@Id	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private long identity;
-	// TODO: sollte final/readOnly sein??
 
 	@Positive
 	@Version

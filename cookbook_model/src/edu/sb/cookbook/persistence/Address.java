@@ -1,20 +1,32 @@
 package edu.sb.cookbook.persistence;
 
 import javax.json.bind.annotation.JsonbProperty;
-
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.validation.constraints.Size;
+
+@Embeddable
+@Table(schema="cookbook", name="Address", indexes={})
+@DiscriminatorValue("Address")
 
 public class Address implements Comparable<BaseEntity> {
 	@Size(max=15)
+	@Column(nullable=true, updatable=true)
 	private String postCode;
 	
 	@Size(max=50)
+	@Column(nullable=true, updatable=true)
 	private String street;
 	
 	@Size(max=50)
+	@Column(nullable=true, updatable=true)
 	private String city;
 	
 	@Size(max=50)
+	@Column(nullable=true, updatable=true)
 	private String country;
 	
 	/**

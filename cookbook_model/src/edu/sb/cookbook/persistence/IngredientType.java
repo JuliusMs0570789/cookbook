@@ -1,20 +1,40 @@
 package edu.sb.cookbook.persistence;
 
 import javax.json.bind.annotation.JsonbProperty;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.Enumerated;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 // TODO: *:0..1 Relation (beidseitig) zu Person
 // TODO: *:1 Relation zu Document
 // TODO: *:1 Relation zu Restriction
 
+@Entity
+@Table(schema="cookbook", name="IngredientType", indexes={})
+@PrimaryKeyJoinColumn(name="ingredientTypeIdentity")
+@DiscriminatorValue("IngredientType")
+
 public class IngredientType extends BaseEntity {
+	@NotNull @ManyToOne
 	public Document avatar;
 	
+	@ManyToOne @JoinColumn(name = "ingredientTypes")
 	public Person owner;
 	
+	@Column(nullable=true, updatable=true)
 	public String alias;
 	
+	@NotNull @ManyToOne
+	@Column(nullable=false, updatable=true) @Enumerated
 	public Restriction restriction;
 	
+	@Column(nullable=true, updatable=true)
 	public String description;
 	
 	

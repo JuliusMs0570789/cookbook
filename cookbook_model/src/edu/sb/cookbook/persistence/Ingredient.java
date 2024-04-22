@@ -2,31 +2,56 @@ package edu.sb.cookbook.persistence;
 
 import javax.json.bind.annotation.JsonbProperty;
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.Enumerated;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 // TODO: *:0..1 Relation (beidseitig) zu Recipe
 // TODO: *:1 Relation zu IngredientType
 // TODO: *:1 Relation zu Ingredient.Unit
 
+@Entity
+@Table(schema="cookbook", name="Ingredient", indexes={})
+@PrimaryKeyJoinColumn(name="ingredientIdentity")
+@DiscriminatorValue("Ingredient")
 
 public class Ingredient extends BaseEntity {	
-	@Column(nullable=false, updatable=true)
+	@NotNull @ManyToOne @JoinColumn(name="ingredients")
 	private Recipe recipe;
 	
+	@NotNull @ManyToOne
 	private IngredientType type;
 	
+	@Positive
+	@Column(nullable=false, updatable=true)
 	private float amount;
-	
+
+	@NotNull @ManyToOne
+	@Column(nullable=false, updatable=true) @Enumerated 
 	private Ingredient.Unit unit;
 	
 	static public enum Unit {
 		LITRE, GRAM, TEASPOON, TABLESPOON, PINCH, CUP, CAN, TUBE, BUSHEL, PIECE		
 	}
 	
-	public Ingredient () {
-		// TODO: how can the recipe be initialized at first?
-		this.unit = Unit.values()[1];
+	protected Ingredient () {
+		this(null);
+	}
+	
+	public Ingredient (Recipe recipe) {
+		super();
+		if (recipe == null) recipe = new Recipe();
+		this.recipe = recipe;
 		this.type = null;
-		this.amount = 0;
+		this.amount = 0f;
+		this.unit = Unit.values()[1];
 	}
 	
 	@JsonbProperty
