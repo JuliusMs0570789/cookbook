@@ -1,6 +1,7 @@
 package edu.sb.cookbook.persistence;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.json.bind.annotation.JsonbProperty;
