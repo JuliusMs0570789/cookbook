@@ -3,12 +3,13 @@ package edu.sb.cookbook.persistence;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.persistence.Column;
 
+// TODO: inherits BaseEntity
 // TODO: *:0..1 Relation (beidseitig) zu Recipe
 // TODO: *:1 Relation zu IngredientType
 // TODO: *:1 Relation zu Ingredient.Unit
 
 
-public class Ingredient extends BaseEntity {	
+public class Ingredient {	
 	@Column(nullable=false, updatable=true)
 	private Recipe recipe;
 	

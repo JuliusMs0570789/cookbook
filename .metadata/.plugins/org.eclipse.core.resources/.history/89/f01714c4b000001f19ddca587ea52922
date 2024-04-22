@@ -18,6 +18,7 @@ import edu.sb.tool.HashCodes;
 import edu.sb.tool.JsonProtectedPropertyStrategy;
 
 
+
 /**
  * Instances of this class model document entities.
  */

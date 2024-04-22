@@ -2,11 +2,12 @@ package edu.sb.cookbook.persistence;
 
 import javax.json.bind.annotation.JsonbProperty;
 
+// TODO: inherits BaseEntity
 // TODO: *:0..1 Relation (beidseitig) zu Person
 // TODO: *:1 Relation zu Document
-// TODO: *:1 Relation zu Restriction
+// TODO: *:1 Relation zu Restrictioin
 
-public class IngredientType extends BaseEntity {
+public class IngredientType {
 	public Document avatar;
 	
 	public Person owner;

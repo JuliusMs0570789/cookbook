@@ -3,13 +3,6 @@ package edu.sb.cookbook.persistence;
 import java.util.Set;
 import javax.json.bind.annotation.JsonbProperty;
 
-// TODO: *:0..1 Relation (beidseitig) zu Person
-// TODO: *:1 Relation (+avatar) zu Dokument
-// TODO: *:1 Relation (+illustrations)  zu Dokument
-// TODO: 1:* Relation (beidseitig) zu Ingredient
-// TODO: *:1 Relation zu Recipe.Category
-// TODO: dependency zu Restriction
-
 public class Recipe extends BaseEntity {
 	private Document avatar;
 	

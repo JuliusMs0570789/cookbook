@@ -5,14 +5,7 @@ import java.util.Set;
 
 import javax.json.bind.annotation.JsonbProperty;
 
-// TODO: 1:1-Relation (composition) zu Address
-//TODO: 1:1-Relation (composition) zu Name
-// TODO: 0..1:* Relation (beidseitig) zu Recipe
-// TODO: *:1 Relation zu Dokument
-//TODO: 0..1:* Relation (beidseitig) zu IngredientType
-//TODO: 1:* Relation zu Person.Group
-
-
+// TODO: 
 
 public class Person extends BaseEntity {
 	// TODO What needs to be added here?
