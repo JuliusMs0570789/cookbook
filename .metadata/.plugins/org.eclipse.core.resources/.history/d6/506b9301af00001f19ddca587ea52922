@@ -89,9 +89,11 @@ public class Person {
 		return this.group;
 	}
 	
-	public void setGroup(Person.Group group) {
+	public void setRestriction(Person.Group group) {
 		this.group = group;
 	}
+	
+	// TODO: add methods getGropus and setGroups
 	
 	@JsonbProperty
 	public Name getName () {

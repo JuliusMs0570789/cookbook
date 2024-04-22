@@ -85,13 +85,7 @@ public class Person {
 		this.passwordHash = passwordHash;
 	}
 	
-	public Person.Group getGroup() {
-		return this.group;
-	}
-	
-	public void setGroup(Person.Group group) {
-		this.group = group;
-	}
+	// TODO: add methods getGropus and setGroups
 	
 	@JsonbProperty
 	public Name getName () {
