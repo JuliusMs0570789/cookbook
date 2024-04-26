@@ -17,6 +17,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.eclipse.persistence.annotations.CacheIndex;
+
 @Entity
 @Table(schema="cookbook", name="Recipe", indexes={})
 @PrimaryKeyJoinColumn(name="recipeIdentity")
@@ -26,8 +28,9 @@ public class Recipe extends BaseEntity {
 		MAIN_COURSE, APPETIZER, SNACK, DESSERT, BREAKFAST, BUFFET, BARBEQUE, ADOLESCENT, INFANT		
 	}
 	
-	@Size(max = 128)
-	@Column(nullable=true, updatable=true, unique = true, length = 128)
+	@NotNull @Size(max = 128)
+	@Column(nullable=false, updatable=true, unique = true, length = 128)
+	@CacheIndex(updateable=true)
 	private String title;
 	
 	@Size(max = 4094)
@@ -38,16 +41,16 @@ public class Recipe extends BaseEntity {
 	@Column(nullable=true, updatable=true, length = 4094)
 	private String instruction;
 	
-	@NotNull @ManyToOne
+	@NotNull
 	@Enumerated(EnumType.STRING)
 	@Column(nullable=false, updatable=true)
 	private Category category;
 	
-	@ManyToOne(optional = false)
+	@NotNull @ManyToOne(optional = false)
 	@JoinColumn(nullable=false, updatable=true, name = "avatarReference")
 	private Document avatar;
 	
-	@ManyToOne(optional = false)
+	@ManyToOne(optional = true)
 	@JoinColumn(nullable=true, updatable=true, name = "ownerReference")
 	private Person owner;
 	
