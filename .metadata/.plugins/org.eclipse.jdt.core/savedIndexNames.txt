@@ -31,7 +31,6 @@ INDEX VERSION 1.134+C:\Users\Lukas\!Media Programming\cookbook\.metadata\.plugin
 2532018374.index
 2057031769.index
 79951386.index
-1656024134.index
 4189160684.index
 2751465926.index
 2329759188.index

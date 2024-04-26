@@ -10,40 +10,39 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-
-// TODO: *:0..1 Relation (beidseitig) zu Person
-// TODO: *:1 Relation zu Document
-// TODO: *:1 Relation zu Restriction
+import javax.validation.constraints.Size;
+import org.eclipse.persistence.annotations.CacheIndex;
+import javax.persistence.EnumType;
 
 @Entity
 @Table(schema="cookbook", name="IngredientType", indexes={})
 @PrimaryKeyJoinColumn(name="ingredientTypeIdentity")
 @DiscriminatorValue("IngredientType")
-
 public class IngredientType extends BaseEntity {
-	@NotNull @ManyToOne
-	public Document avatar;
-	
-	@ManyToOne @JoinColumn(name = "ingredientTypes")
-	public Person owner;
-	
-	@Column(nullable=true, updatable=true)
+	@NotNull @Size(max = 128)
+	@Column(nullable=false, updatable=true, length = 128, unique = true)
+	@CacheIndex(updateable=true)
 	public String alias;
-	
-	@NotNull @ManyToOne
-	@Column(nullable=false, updatable=true) @Enumerated
-	public Restriction restriction;
-	
-	@Column(nullable=true, updatable=true)
+
+	@Size(max = 4094)
+	@Column(nullable=true, updatable=true, length = 4094)
 	public String description;
 	
+	@NotNull
+	@Column(nullable=false, updatable=true)
+	@Enumerated(EnumType.STRING)
+	public Restriction restriction;
+	
+	@ManyToOne(optional = false)
+	@JoinColumn(nullable=false, updatable=true, name = "avatarReference")
+	public Document avatar;
+	
+	@ManyToOne(optional = true)
+	@JoinColumn(nullable=true, updatable=true, name = "ownerReference")
+	public Person owner;
 	
 	public IngredientType () {
-		this.avatar = null;
-		this.owner = null;
-		this.alias = null;
-		this.restriction = Restriction.values()[0];
-		this.description = null;
+		this.restriction = Restriction.VEGAN; // laut Folie UML-Diagram auf 'NONE'
 	}
 	
 	@JsonbProperty

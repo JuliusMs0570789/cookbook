@@ -13,10 +13,8 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -37,12 +35,11 @@ import edu.sb.tool.HashCodes;
 @PrimaryKeyJoinColumn(name="personIdentity")
 @DiscriminatorValue("Person")
 public class Person extends BaseEntity {
+	// TODO Struktur dieser Klasse (Anordnung der Variablen) auch in anderen Klassen so umsetzen
 	static public enum Group {
 		USER, ADMIN
 	}
-	
-	// TODO Struktur dieser Klasse (Anordnung der Variablen) auch in anderen Klassen so umsetzen
-	
+		
 	static public String DEFAULT_PASSWORD_HASH = HashCodes.sha2HashText(256, "changemeplease");
 
 	@NotNull @Email @Size(max = 128)
