@@ -1,59 +1,55 @@
 package edu.sb.cookbook.persistence;
 
+import java.util.Comparator;
+
 import javax.json.bind.annotation.JsonbProperty;
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
 @Embeddable
-@Table(schema="cookbook", name="Address", indexes={})
-@DiscriminatorValue("Address")
+// @Table(schema="cookbook", name="Address", indexes={})
+// @DiscriminatorValue("Address") -> ist keine Entität
 
-public class Address implements Comparable<BaseEntity> {
-	@Size(max=15)
-	@Column(nullable=true, updatable=true)
-	private String postCode;
+public class Address implements Comparable<Address> {
 	
-	@Size(max=50)
-	@Column(nullable=true, updatable=true)
+	static public final Comparator<Address> COMPARATOR = Comparator
+		.comparing(Address::getCountry)
+		.thenComparing(Address::getCity)
+		.thenComparing(Address::getStreet)
+		.thenComparing(Address::getPostcode);
+	
+	@Size(max=15)
+	@Column(nullable = false, updatable = true, length = 15)
+	private String postcode;
+	
+	@Size(max=63)
+	@Column(nullable = false, updatable = true, length = 63)
 	private String street;
 	
-	@Size(max=50)
-	@Column(nullable=true, updatable=true)
+	@Size(max=63)
+	@Column(nullable = false, updatable = true, length = 63)
 	private String city;
 	
-	@Size(max=50)
-	@Column(nullable=true, updatable=true)
+	@Size(max=63)
+	@Column(nullable = false, updatable = true, length = 63)
 	private String country;
 	
 	/**
-	 * Initializes a new instance.
-	 */
-	public Address () {
-		this.postCode = null;
-		this.street = null;
-		this.city = null;
-		this.country = null;
-	}
-	
-	/**
-	 * Returns the postCode.
-	 * @return the postCode, or {@code null} for none
+	 * Returns the postcode.
+	 * @return the postcode, or {@code null} for none
 	 */
 	@JsonbProperty
 	public String getPostcode () {
-		return this.postCode;
+		return this.postcode;
 	}
 	
 	/**
-	 * Sets the postCode.
-	 * @param postCode the postCode, or {@code null} for none
+	 * Sets the postcode.
+	 * @param postcode the postcode, or {@code null} for none
 	 */
-	public void setPostcode (final String postCode) {
-		this.postCode = postCode;
+	public void setPostcode (final String postcode) {
+		this.postcode = postcode;
 	}
 	
 	/**
@@ -108,8 +104,7 @@ public class Address implements Comparable<BaseEntity> {
 	}
 
 	@Override
-	public int compareTo(BaseEntity o) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int compareTo(Address other) {
+		return COMPARATOR.compare(this, other);
 	}
 }

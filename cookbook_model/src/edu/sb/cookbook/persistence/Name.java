@@ -1,35 +1,34 @@
 package edu.sb.cookbook.persistence;
 
+import java.util.Comparator;
 import javax.json.bind.annotation.JsonbProperty;
-import javax.persistence.DiscriminatorValue;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
 @Embeddable
-@Table(schema = "cookbook", name = "Name", indexes = {})
-@DiscriminatorValue("Name")
+// @Table(schema = "cookbook", name = "Name", indexes = {})
+// @DiscriminatorValue("Name")
 
 public class Name implements Comparable<Name> {
-	@Size(max = 10)
+	
+	static public final Comparator<Name> COMPARATOR = Comparator
+			.comparing(Name::getTitle) // TODO check for null, title can be null
+			.thenComparing(Name::getFamily)
+			.thenComparing(Name::getGiven);
+	
+	@Size(max = 15)
+	@Column(nullable = true, updatable = true, length = 15)
 	private String title;
 
-	@Size(max = 40)
+	@Size(max = 31)
+	@Column(nullable = false, updatable = true, length = 31, name = "surname")
 	private String family;
 
-	@Size(max = 40)
+	@Size(max = 31)
+	@Column(nullable = false, updatable = true, length = 31, name = "forename")
 	private String given;
-
-	/**
-	 * Initializes a new instance.
-	 */
-	public Name() {
-		this.title = null;
-		this.family = null;
-		this.given = null;
-	}
-
+	
 	/**
 	 * Returns the title.
 	 * 
@@ -88,8 +87,7 @@ public class Name implements Comparable<Name> {
 	}
 
 	@Override
-	public int compareTo(Name o) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int compareTo(Name other) {
+		return COMPARATOR.compare(this, other);
 	}
 }
