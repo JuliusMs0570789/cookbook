@@ -35,7 +35,6 @@ import edu.sb.tool.HashCodes;
 @PrimaryKeyJoinColumn(name="personIdentity")
 @DiscriminatorValue("Person")
 public class Person extends BaseEntity {
-	// TODO Struktur dieser Klasse (Anordnung der Variablen) auch in anderen Klassen so umsetzen
 	static public enum Group {
 		USER, ADMIN
 	}
