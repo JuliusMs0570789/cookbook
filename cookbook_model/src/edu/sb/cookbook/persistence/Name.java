@@ -13,7 +13,7 @@ import javax.validation.constraints.Size;
 public class Name implements Comparable<Name> {
 	
 	static public final Comparator<Name> COMPARATOR = Comparator
-			.comparing(Name::getTitle) // TODO check for null, title can be null
+                        .comparing(Name::getTitle, Comparator.nullsLast(String::compareTo))
 			.thenComparing(Name::getFamily)
 			.thenComparing(Name::getGiven);
 	
