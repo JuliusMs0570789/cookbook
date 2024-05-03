@@ -1,0 +1,175 @@
+package edu.sb.cookbook.persistence;
+
+import java.util.Collections;
+import java.util.Set;
+import javax.json.bind.annotation.JsonbProperty;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.Enumerated;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
+import javax.validation.Valid;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+// TODO: 1:1-Relation (composition) zu Address
+// TODO: 1:1-Relation (composition) zu Name
+// TODO: 0..1:* Relation (beidseitig) zu Recipe
+// TODO: *:1 Relation zu Dokument
+// TODO: 0..1:* Relation (beidseitig) zu IngredientType
+// TODO: 1:* Relation zu Person.Group
+
+@Entity
+@Table(schema="cookbook", name="Person", indexes={})
+@PrimaryKeyJoinColumn(name="personIdentity")
+@DiscriminatorValue("Person")
+
+public class Person extends BaseEntity {
+	
+	static public enum Group {
+		USER, ADMIN
+	}
+	
+	// TODO: initialize with HashTools method?
+	static public String DEFAULT_PASSWORD_HASH = new HashCodes();
+
+	@NotNull @ManyToOne
+	private Document avatar;
+
+	@OneToMany(mappedBy = "owner") @JoinTable
+	private Set<Recipe> recipes;
+
+	@OneToMany(mappedBy = "owner") @JoinColumn
+	private Set<IngredientType> ingredientTypes; 
+
+	@Email
+	@Column(nullable=true, updatable=true)
+	private String email;
+
+	@NotNull @NotEmpty
+	@Column(nullable=false, updatable=true)
+	private String passwordHash;
+	
+	@NotNull
+	@Enumerated @OneToMany
+	private Person.Group group;
+	
+	@OneToOne(mappedBy = "Name")
+	@NotNull @Valid @Embedded
+	private Name name;
+
+	@OneToOne(mappedBy = "Address")
+	@NotNull @Valid @Embedded
+	private Address address;
+
+	private Set<String> phones;
+	
+
+
+	protected Person() {
+		this("", Collections.emptySet(), null, null, Collections.emptySet());
+	}
+	
+	public Person(String DEFAULT_PASSWORD_HASH, Set<Recipe> recipes, Name name, Address address, Set<String> phones) {
+		super();
+		if (recipes == Collections.EMPTY_SET) recipes = Collections.emptySet();
+		if (name == null) name = new Name();
+		if (address == null) address = new Address();
+		if (phones == Collections.EMPTY_SET) phones = Collections.emptySet();
+		this.recipes = recipes;
+		this.ingredientTypes = Collections.emptySet();
+		this.email = null;
+		this.group = Group.values()[0];
+		this.name = name;
+		this.address = address;
+		this.phones = phones;
+	}
+	
+	@JsonbProperty
+	public Document getAvatar () {
+		return this.avatar;
+	}
+	
+	public void setAvatar (final Document avatar) {
+		this.avatar = avatar;
+	}
+	
+	@JsonbProperty
+	public Set<Recipe> getRecipes () {
+		return this.recipes;
+	}
+	
+	protected void setRecipes (final Set<Recipe> recipes) {
+		this.recipes = recipes;
+	}
+	
+	@JsonbProperty
+	public Set<IngredientType> getIngredientTypes () {
+		return this.ingredientTypes;
+	}
+	
+	protected void setIngredientType (final Set<IngredientType> ingredientTypes) {
+		this.ingredientTypes = ingredientTypes;
+	}
+	
+	@JsonbProperty
+	public String getEmail () {
+		return this.email;
+	}
+	
+	public void setEmail (final String email) {
+		this.email = email;
+	}
+	
+	@JsonbProperty
+	public String getPasswordHash () {
+		return this.passwordHash;
+	}
+	
+	public void setPasswordHash (final String passwordHash) {
+		this.passwordHash = passwordHash;
+	}
+	
+	public Person.Group getGroup() {
+		return this.group;
+	}
+	
+	public void setGroup(Person.Group group) {
+		this.group = group;
+	}
+	
+	@JsonbProperty
+	public Name getName () {
+		return this.name;
+	}
+	
+	protected void setName (final Name name) {
+		this.name = name;
+	}
+	
+	@JsonbProperty
+	public Address getAddress () {
+		return this.address;
+	}
+	
+	protected void setAddress (final Address address) {
+		this.address = address;
+	}
+	
+	@JsonbProperty
+	public Set<String> getPhones () {
+		return this.phones;
+	}
+	
+	protected void setPhones (final Set<String> phones) {
+		this.phones = phones;
+	}
+}

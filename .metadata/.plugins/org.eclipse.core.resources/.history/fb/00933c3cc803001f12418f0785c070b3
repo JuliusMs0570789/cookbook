@@ -1,0 +1,104 @@
+package edu.sb.cookbook.persistence;
+
+import java.util.Comparator;
+
+import javax.json.bind.annotation.JsonbProperty;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.validation.constraints.Size;
+
+@Embeddable
+@Table(schema = "cookbook", name = "Name", indexes = {})
+@DiscriminatorValue("Name")
+
+public class Name implements Comparable<Name> {
+	
+	static public final Comparator<Name> COMPARATOR = Comparator
+			.comparing(Name::getTitle) // TODO check for null, title can be null
+			.thenComparing(Name::getFamily)
+			.thenComparing(Name::getGiven);
+	
+	@Size(max = 15)
+	@Column(nullable = true, updatable = true)
+	private String title;
+
+	@Size(max = 31)
+	private String family;
+
+	@Size(max = 31)
+	private String given;
+
+	/**
+	 * Initializes a new instance.
+	 */
+	public Name() {
+		this.title = null;
+		this.family = null;
+		this.given = null;
+	}
+
+	/**
+	 * Returns the title.
+	 * 
+	 * @return the title, or {@code null} for none
+	 */
+	@JsonbProperty
+	public String getTitle() {
+		return this.title;
+	}
+
+	/**
+	 * Sets the title.
+	 * 
+	 * @param title the title, or {@code null} for none
+	 */
+	public void setTitle(final String title) {
+		this.title = title;
+	}
+
+	/**
+	 * Returns the family.
+	 * 
+	 * @return the family, or {@code null} for none
+	 */
+	@JsonbProperty
+	public String getFamily() {
+		return this.family;
+	}
+
+	/**
+	 * Sets the family.
+	 * 
+	 * @param family the family, or {@code null} for none
+	 */
+	public void setFamily(final String family) {
+		this.family = family;
+	}
+
+	/**
+	 * Returns the given.
+	 * 
+	 * @return the given, or {@code null} for none
+	 */
+	@JsonbProperty
+	public String getGiven() {
+		return this.given;
+	}
+
+	/**
+	 * Sets the given.
+	 * 
+	 * @param given the given, or {@code null} for none
+	 */
+	public void setGiven(final String given) {
+		this.given = given;
+	}
+
+	@Override
+	public int compareTo(Name other) {
+		return COMPARATOR.compare(this, other);
+	}
+}

@@ -1,27 +1,48 @@
 package edu.sb.cookbook.persistence;
 
 import javax.json.bind.annotation.JsonbProperty;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.Enumerated;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import org.eclipse.persistence.annotations.CacheIndex;
+import javax.persistence.EnumType;
 
-public class IngredientType {
-	public Document avatar;
-	
-	public Person owner;
-	
+@Entity
+@Table(schema="cookbook", name="IngredientType", indexes={})
+@PrimaryKeyJoinColumn(name="ingredientTypeIdentity")
+@DiscriminatorValue("IngredientType")
+public class IngredientType extends BaseEntity {
+	@NotNull @Size(max = 128)
+	@Column(nullable=false, updatable=true, length = 128, unique = true)
+	@CacheIndex(updateable=true)
 	public String alias;
-	
-	static public enum restriction {
-		NONE, PESCATARIAN, LACTO_OVO_VEGETARIAN, LACTO_VEGETARIAN, VEGAN	
-	}
-	
+
+	@Size(max = 4094)
+	@Column(nullable=true, updatable=true, length = 4094)
 	public String description;
 	
+	@NotNull
+	@Column(nullable=false, updatable=true)
+	@Enumerated(EnumType.STRING)
+	public Restriction restriction;
+	
+	@ManyToOne(optional = false)
+	@JoinColumn(nullable=false, updatable=true, name = "avatarReference")
+	public Document avatar;
+	
+	@ManyToOne(optional = true)
+	@JoinColumn(nullable=true, updatable=true, name = "ownerReference")
+	public Person owner;
 	
 	public IngredientType () {
-		this.avatar = null;
-		this.owner = null;
-		this.alias = null;
-		// TODO: handle restricition
-		this.description = null;
+		this.restriction = Restriction.VEGAN; // laut Folie UML-Diagram auf 'NONE'
 	}
 	
 	@JsonbProperty
@@ -51,7 +72,13 @@ public class IngredientType {
 		this.alias = alias;
 	}
 	
-	// TODO: add methods getRestriction and setRestriction
+	public Restriction getRestriction() {
+		return this.restriction;
+	}
+	
+	public void setRestriction(Restriction restriction) {
+		this.restriction = restriction;
+	}
 	
 	@JsonbProperty
 	public String getDescription () {

@@ -1,75 +1,93 @@
 package edu.sb.cookbook.persistence;
 
+import java.util.Comparator;
 import javax.json.bind.annotation.JsonbProperty;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.validation.constraints.Size;
 
-public class Name {
-	@Size(max=10)
+@Embeddable
+// @Table(schema = "cookbook", name = "Name", indexes = {})
+// @DiscriminatorValue("Name")
+
+public class Name implements Comparable<Name> {
+	
+	static public final Comparator<Name> COMPARATOR = Comparator
+                        .comparing(Name::getTitle, Comparator.nullsLast(String::compareTo))
+			.thenComparing(Name::getFamily)
+			.thenComparing(Name::getGiven);
+	
+	@Size(max = 15)
+	@Column(nullable = true, updatable = true, length = 15)
 	private String title;
-	
-	@Size(max=40)
+
+	@Size(max = 31)
+	@Column(nullable = false, updatable = true, length = 31, name = "surname")
 	private String family;
-	
-	@Size(max=40)
+
+	@Size(max = 31)
+	@Column(nullable = false, updatable = true, length = 31, name = "forename")
 	private String given;
 	
 	/**
-	 * Initializes a new instance.
-	 */
-	public Name () {
-		this.title = null;
-		this.family = null;
-		this.given = null;
-	}
-	
-	/**
 	 * Returns the title.
+	 * 
 	 * @return the title, or {@code null} for none
 	 */
 	@JsonbProperty
-	public String getTitle () {
+	public String getTitle() {
 		return this.title;
 	}
-	
+
 	/**
 	 * Sets the title.
+	 * 
 	 * @param title the title, or {@code null} for none
 	 */
-	public void setTitle (final String title) {
+	public void setTitle(final String title) {
 		this.title = title;
 	}
-	
+
 	/**
 	 * Returns the family.
+	 * 
 	 * @return the family, or {@code null} for none
 	 */
 	@JsonbProperty
-	public String getFamily () {
+	public String getFamily() {
 		return this.family;
 	}
-	
+
 	/**
 	 * Sets the family.
+	 * 
 	 * @param family the family, or {@code null} for none
 	 */
-	public void setFamily (final String family) {
+	public void setFamily(final String family) {
 		this.family = family;
 	}
-	
+
 	/**
 	 * Returns the given.
+	 * 
 	 * @return the given, or {@code null} for none
 	 */
 	@JsonbProperty
-	public String getGiven () {
+	public String getGiven() {
 		return this.given;
 	}
-	
+
 	/**
 	 * Sets the given.
+	 * 
 	 * @param given the given, or {@code null} for none
 	 */
-	public void setGiven (final String given) {
+	public void setGiven(final String given) {
 		this.given = given;
+	}
+
+	@Override
+	public int compareTo(Name other) {
+		return COMPARATOR.compare(this, other);
 	}
 }

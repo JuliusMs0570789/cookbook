@@ -52,6 +52,7 @@ public abstract class BaseEntity implements Comparable<BaseEntity> {
 	 * Initializes a new instance.
 	 */
 	public BaseEntity () {
+		this.identity = 0;
 		this.version = 1;
 		this.created = System.currentTimeMillis();
 		this.modified = System.currentTimeMillis();

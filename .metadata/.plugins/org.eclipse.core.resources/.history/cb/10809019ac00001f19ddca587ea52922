@@ -1,0 +1,52 @@
+package edu.sb.cookbook.persistence;
+
+import javax.json.bind.annotation.JsonbProperty;
+import javax.persistence.Column;
+
+public class Ingredient {	
+	@Column(nullable=false, updatable=true)
+	private Recipe recipe;
+	
+	private IngredientType type;
+	
+	private float amount;
+	
+	static public enum Unit {
+		LITRE, GRAM, TEASPOON, TABLESPOON, PINCH, CUP, CAN, TUBE, BUSHEL, PIECE		
+	}
+	
+	public Ingredient () {
+		// TODO: how can the recipe be initialized at first?
+		this.unit = Unit.values()[1];
+		this.type = null;
+		this.amount = 0;
+		// TODO: how can the unit be initialized at first?
+	}
+	
+	@JsonbProperty
+	public Recipe getRecipe () {
+		return this.recipe;
+	}
+	
+	protected void setRecipe (final Recipe recipe) {
+		this.recipe = recipe;
+	}
+	
+	@JsonbProperty
+	public IngredientType getType () {
+		return this.type;
+	}
+	
+	public void setType (final IngredientType type) {
+		this.type = type;
+	}
+	
+	@JsonbProperty
+	public float getAmount () {
+		return this.amount;
+	}
+	
+	public void setAmount (final float amount) {
+		this.amount = amount;
+	}
+}

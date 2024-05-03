@@ -1,0 +1,86 @@
+package edu.sb.cookbook.persistence;
+
+import javax.json.bind.annotation.JsonbProperty;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+
+
+@Entity
+@Table(schema="cookbook", name="Ingredient", indexes={})
+@PrimaryKeyJoinColumn(name="ingredientIdentity")
+@DiscriminatorValue("Ingredient")
+
+public class Ingredient extends BaseEntity {	
+	static public enum Unit {
+		LITRE, GRAM, TEASPOON, TABLESPOON, PINCH, CUP, CAN, TUBE, BUSHEL, PIECE		
+	}
+	
+	@NotNull @ManyToOne
+	@JoinColumn(nullable = false, updatable = true, name="recipeReference")
+	private Recipe recipe;
+	
+	@NotNull @ManyToOne
+	@JoinColumn(nullable = false, updatable = true, name="typeReference")
+	private IngredientType type;
+	
+	@Positive
+	@Column(nullable=false, updatable=true)
+	private float amount;
+
+	@NotNull @ManyToOne
+	@Enumerated(EnumType.STRING)
+	@Column(nullable=false, updatable=true)
+	private Unit unit;
+	
+	public Ingredient () {
+		super();
+		this.recipe = new Recipe();
+		this.amount = 0f;
+		this.unit = Unit.GRAM;
+	}
+	
+	@JsonbProperty
+	public Recipe getRecipe () {
+		return this.recipe;
+	}
+	
+	protected void setRecipe (final Recipe recipe) {
+		this.recipe = recipe;
+	}
+	
+	@JsonbProperty
+	public IngredientType getType () {
+		return this.type;
+	}
+	
+	public void setType (final IngredientType type) {
+		this.type = type;
+	}
+	
+	@JsonbProperty
+	public float getAmount () {
+		return this.amount;
+	}
+	
+	public void setAmount (final float amount) {
+		this.amount = amount;
+	}
+	
+	@JsonbProperty
+	public Unit getUnit () {
+		return this.unit;
+	}
+	
+	public void setUnit (final Unit unit) {
+		this.unit = unit;
+	}
+}

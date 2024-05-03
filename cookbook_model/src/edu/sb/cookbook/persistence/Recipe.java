@@ -1,35 +1,88 @@
 package edu.sb.cookbook.persistence;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Set;
 import javax.json.bind.annotation.JsonbProperty;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
-public class Recipe {
-	private Document avatar;
-	
-	private Person owner;
-	
-	private Set<Ingredient> ingredients;
-	
-	private Set<Document> illustrations;
-	
-	private String title;
-	
-	private String description;
-	
-	private String instruction;
-	
-	static public enum category {
+import org.eclipse.persistence.annotations.CacheIndex;
+
+@Entity
+@Table(schema="cookbook", name="Recipe", indexes={})
+@PrimaryKeyJoinColumn(name="recipeIdentity")
+@DiscriminatorValue("Recipe")
+public class Recipe extends BaseEntity {
+	static public enum Category {
 		MAIN_COURSE, APPETIZER, SNACK, DESSERT, BREAKFAST, BUFFET, BARBEQUE, ADOLESCENT, INFANT		
 	}
 	
-	public Recipe() {
-		this.avatar = null;
-		this.owner = null;
-		// TODO: how should Ingredients and Illustrations be initialized?
-		// TODO: how should Category be initialized?
-		this.title = null;
-		this.description = null;
-		this.instruction = null;	
+	@NotNull @Size(max = 128)
+	@Column(nullable=false, updatable=true, unique = true, length = 128)
+	@CacheIndex(updateable=true)
+	private String title;
+	
+	@NotNull
+	@Enumerated(EnumType.STRING)
+	@Column(nullable=false, updatable=true)
+	private Category category;
+	
+	@Size(max = 4094)
+	@Column(nullable=true, updatable=true, length = 4094)
+	private String description;
+	
+	@Size(max = 4094)
+	@Column(nullable=true, updatable=true, length = 4094)
+	private String instruction;
+	
+	@ManyToOne(optional = false)
+	@JoinColumn(nullable=false, updatable=true, name = "avatarReference")
+	private Document avatar;
+	
+	@ManyToOne(optional = true)
+	@JoinColumn(nullable=true, updatable=true, name = "ownerReference")
+	private Person owner;
+	
+	@NotNull
+	@OneToMany(mappedBy = "recipe", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE})
+	private Set<Ingredient> ingredients;
+	
+	@NotNull
+	@ManyToMany
+	@JoinTable(
+		schema = "cookbook",
+		name = "RecipeIllustrationAssociation",
+		joinColumns = @JoinColumn(nullable=false, updatable=false, insertable=true, name = "recipeReference"),
+		inverseJoinColumns = @JoinColumn(nullable=false, updatable=false, insertable=true, name = "documentReference"),
+		uniqueConstraints = @UniqueConstraint(columnNames = {"recipeReference", "documentReference"})
+	)
+	private Set<Document> illustrations;
+	
+	/**
+	 * Initializes a new instance.
+	 * @param content the content, or {@code null} for none
+	 */
+	public Recipe () {
+		super();
+		this.category = Category.MAIN_COURSE;
+		this.ingredients = Collections.emptySet();
+		this.illustrations = new HashSet<>();
 	}
 	
 	
@@ -65,8 +118,16 @@ public class Recipe {
 		return this.illustrations;
 	}
 	
-	public void setIllustrations (final Set<Document> illustrations) {
+	protected void setIllustrations (final Set<Document> illustrations) {
 		this.illustrations = illustrations;
+	}
+	
+	public Recipe.Category getCategory() {
+		return this.category;
+	}
+	
+	public void setCategory(Recipe.Category category) {
+		this.category = category;
 	}
 	
 	@JsonbProperty
@@ -95,4 +156,8 @@ public class Recipe {
 	public void setInstruction (final String instruction) {
 		this.instruction = instruction;
 	}
+	
+	public Restriction getRestriction() {
+		return this.ingredients.stream().map(Ingredient::getType).map(IngredientType::getRestriction).min(Comparator.naturalOrder()).orElse(Restriction.VEGAN);
+    }
 }

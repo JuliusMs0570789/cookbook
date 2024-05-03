@@ -1,0 +1,153 @@
+package edu.sb.cookbook.persistence;
+
+import java.util.Collections;
+import java.util.Set;
+import javax.json.bind.annotation.JsonbProperty;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+
+@Entity
+@Table(schema="cookbook", name="Recipe", indexes={})
+@PrimaryKeyJoinColumn(name="recipeIdentity")
+@DiscriminatorValue("Recipe")
+public class Recipe extends BaseEntity {
+	static public enum Category {
+		MAIN_COURSE, APPETIZER, SNACK, DESSERT, BREAKFAST, BUFFET, BARBEQUE, ADOLESCENT, INFANT		
+	}
+	
+
+	
+	@Size(max = 128)
+	@Column(nullable=true, updatable=true, unique = true, length = 128)
+	private String title;
+	
+	@Size(max = 4094)
+	@Column(nullable=true, updatable=true, length = 4094)
+	private String description;
+	
+	@Size(max = 4094)
+	@Column(nullable=true, updatable=true, length = 4094)
+	private String instruction;
+	
+	@NotNull @ManyToOne
+	@Enumerated(EnumType.STRING)
+	@Column(nullable=false, updatable=true)
+	private Category category;
+	
+	@ManyToOne(optional = false)
+	@JoinColumn(nullable=false, updatable=true, name = "avatarReference")
+	private Document avatar;
+	
+	@ManyToOne(optional = false)
+	@JoinColumn(nullable=true, updatable=true, name = "ownerReference")
+	private Person owner;
+	
+	@NotNull
+	@OneToMany(mappedBy = "recipe", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
+	private Set<Ingredient> ingredients;
+	
+	@NotNull
+	@OneToMany(mappedBy = "recipe", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
+	private Set<Document> illustrations;
+	
+	/**
+	 * Initializes a new instance.
+	 * @param content the content, or {@code null} for none
+	 */
+	public Recipe () {
+		super();
+		this.category = Category.MAIN_COURSE;
+		this.ingredients = Collections.emptySet();
+		this.illustrations = Collections.emptySet();
+	}
+	
+	
+	@JsonbProperty
+	public Document getAvatar () {
+		return this.avatar;
+	}
+	
+	public void setAvatar (final Document avatar) {
+		this.avatar = avatar;
+	}
+	
+	@JsonbProperty
+	public Person getOwner () {
+		return this.owner;
+	}
+	
+	public void setOwner (final Person owner) {
+		this.owner = owner;
+	}
+	
+	@JsonbProperty
+	public Set<Ingredient> getIngredients () {
+		return this.ingredients;
+	}
+	
+	protected void setIngredients (final Set<Ingredient> ingredients) {
+		this.ingredients = ingredients;
+	}
+	
+	@JsonbProperty
+	public Set<Document> getIllustrations () {
+		return this.illustrations;
+	}
+	
+	public void setIllustrations (final Set<Document> illustrations) {
+		this.illustrations = illustrations;
+	}
+	
+	public Recipe.Category getCategory() {
+		return this.category;
+	}
+	
+	public void setCategory(Recipe.Category category) {
+		this.category = category;
+	}
+	
+	@JsonbProperty
+	public String getTitle () {
+		return this.title;
+	}
+	
+	public void setTitle (final String title) {
+		this.title = title;
+	}
+	
+	@JsonbProperty
+	public String getDescription () {
+		return this.description;
+	}
+	
+	public void setDescription (final String description) {
+		this.description = description;
+	}
+	
+	@JsonbProperty
+	public String getInstruction () {
+		return this.instruction;
+	}
+	
+	public void setInstruction (final String instruction) {
+		this.instruction = instruction;
+	}
+	
+	public Restriction getRestriction() {
+		int lowestOrdinal = Restriction.values().length-1; // ordinal of VEGAN
+		for (Ingredient ingredient : ingredients) {
+        	int restrictionOrdinal = ingredient.getType().getRestriction().ordinal();
+        	if (restrictionOrdinal < lowestOrdinal) lowestOrdinal = restrictionOrdinal;
+        }
+        return Restriction.values()[lowestOrdinal];
+    }
+}

@@ -3,6 +3,9 @@
     <libraryInfo home="/Users/CeSar/Library/Java/JavaVirtualMachines/openjdk-22/Contents/Home" version="22"/>
     <libraryInfo home="/Library/Java/JavaVirtualMachines/jdk-12.jdk/Contents/Home" version="12"/>
     <libraryInfo home="/Users/CeSar/Library/Java/JavaVirtualMachines/openjdk-14.0.1/Contents/Home" version="14.0.1"/>
+    <libraryInfo home="/Library/Java/JavaVirtualMachines/jdk-11.jdk/Contents/Home" version="11.0.22"/>
+    <libraryInfo home="/Users/CeSar/Library/Java/JavaVirtualMachines/corretto-11.0.7/Contents/Home" version="11.0.7"/>
+    <libraryInfo home="C:\Users\Lukas\!Media Programming\eclipse\plugins\org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_17.0.10.v20240120-1143\jre" version="17.0.10"/>
     <libraryInfo home="/Library/Java/JavaVirtualMachines/temurin-8.jdk/Contents/Home" version="1.8.0_302">
         <bootpath>
             <entry path="/Library/Java/JavaVirtualMachines/temurin-8.jdk/Contents/Home/jre/lib/resources.jar"/>
@@ -73,8 +76,6 @@
             <entry path="/Users/CeSar/Library/Java/JavaVirtualMachines/corretto-1.8.0_402/Contents/Home/jre/lib/endorsed"/>
         </endorsedDirs>
     </libraryInfo>
-    <libraryInfo home="/Library/Java/JavaVirtualMachines/jdk-11.jdk/Contents/Home" version="11.0.22"/>
-    <libraryInfo home="/Users/CeSar/Library/Java/JavaVirtualMachines/corretto-11.0.7/Contents/Home" version="11.0.7"/>
     <libraryInfo home="/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home" version="10.0.2"/>
     <libraryInfo home="/Users/CeSar/Library/Java/JavaVirtualMachines/openjdk-14.0.1-1/Contents/Home" version="14.0.1"/>
     <libraryInfo home="/Users/CeSar/Library/Java/JavaVirtualMachines/corretto-11.0.23/Contents/Home" version="11.0.23"/>
