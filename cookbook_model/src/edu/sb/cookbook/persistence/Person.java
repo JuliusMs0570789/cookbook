@@ -3,6 +3,8 @@ package edu.sb.cookbook.persistence;
 import java.util.Collections;
 import java.util.Set;
 import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTransient;
+import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -23,17 +25,15 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-
 import org.eclipse.persistence.annotations.CacheIndex;
-
 import edu.sb.tool.HashCodes;
-
-// TODO für alle Klassen @JsonbProperty VS @JsonbTransient entscheiden (nächste Aufgabe)
+import edu.sb.tool.JsonProtectedPropertyStrategy;
 
 @Entity
 @Table(schema="cookbook", name="Person", indexes={})
 @PrimaryKeyJoinColumn(name="personIdentity")
 @DiscriminatorValue("Person")
+@JsonbVisibility(JsonProtectedPropertyStrategy.class)
 public class Person extends BaseEntity {
 	static public enum Group {
 		USER, ADMIN
@@ -106,7 +106,7 @@ public class Person extends BaseEntity {
 		this.avatar = avatar;
 	}
 	
-	@JsonbProperty
+	@JsonbTransient
 	public Set<Recipe> getRecipes () {
 		return this.recipes;
 	}
@@ -115,7 +115,7 @@ public class Person extends BaseEntity {
 		this.recipes = recipes;
 	}
 	
-	@JsonbProperty
+	@JsonbTransient
 	public Set<IngredientType> getIngredientTypes () {
 		return this.ingredientTypes;
 	}
@@ -142,6 +142,7 @@ public class Person extends BaseEntity {
 		this.passwordHash = passwordHash;
 	}
 	
+	@JsonbProperty
 	public Person.Group getGroup() {
 		return this.group;
 	}
