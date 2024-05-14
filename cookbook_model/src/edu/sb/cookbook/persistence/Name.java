@@ -2,18 +2,18 @@ package edu.sb.cookbook.persistence;
 
 import java.util.Comparator;
 import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.Size;
+import edu.sb.tool.JsonProtectedPropertyStrategy;
 
 @Embeddable
-// @Table(schema = "cookbook", name = "Name", indexes = {})
-// @DiscriminatorValue("Name")
-
+@JsonbVisibility(JsonProtectedPropertyStrategy.class)
 public class Name implements Comparable<Name> {
 	
 	static public final Comparator<Name> COMPARATOR = Comparator
-                        .comparing(Name::getTitle, Comparator.nullsLast(String::compareTo))
+                        .comparing(Name::getTitle, Comparator.nullsLast(Comparator.naturalOrder()))
 			.thenComparing(Name::getFamily)
 			.thenComparing(Name::getGiven);
 	
