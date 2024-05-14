@@ -1,0 +1,109 @@
+package edu.sb.cookbook.service;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import edu.sb.cookbook.persistence.Person;
+
+@Path("persons")
+public class PersonService {
+
+    @Inject
+    private EntityManager entityManager;
+
+    /**
+     * HTTP Signature: GET people IN: - OUT: application/json
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response queryPeople(
+            @QueryParam("name") String name,
+            @QueryParam("email") String email,
+            @QueryParam("result-offset") int resultOffset,
+            @QueryParam("result-limit") int resultLimit) {
+        // Build JPQL query to filter people
+        String jpql = "SELECT p.identity FROM Person p WHERE 1 = 1 ";
+        if (name != null) jpql += "AND p.name = :name ";
+        if (email != null) jpql += "AND p.email = :email ";
+        TypedQuery<Long> query = entityManager.createQuery(jpql, Long.class);
+        if (name != null) query.setParameter("name", name);
+        if (email != null) query.setParameter("email", email);
+        query.setFirstResult(resultOffset);
+        query.setMaxResults(resultLimit);
+
+        // Retrieve matching person IDs
+        try {
+            return Response.ok(query.getResultList()).build();
+        } catch (NoResultException e) {
+            return Response.noContent().build();
+        }
+    }
+
+    /**
+     * HTTP Signature: POST people IN: - JSON OUT: text/plain
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Transactional
+    public Response createOrUpdatePerson(Person person) {
+        // Implementation to create or update person
+    }
+
+    /**
+     * HTTP Signature: DELETE people/{id} IN: - OUT: text/plain
+     */
+    @DELETE
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("{id}")
+    @Transactional
+    public Response deletePerson(@PathParam("id") long id) {
+        // Implementation to delete person
+    }
+
+    /**
+     * HTTP Signature: GET people/{id} IN: - OUT: application/json
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id}")
+    public Response findPerson(@PathParam("id") long id) {
+        // Implementation to find person by id
+    }
+
+    /**
+     * HTTP Signature: GET people/requester IN: - OUT: application/json
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("requester")
+    public Response findRequester(@HeaderParam("X-Requester-Identity") long requesterId) {
+        // Implementation to find requester
+    }
+
+    /**
+     * HTTP Signature: GET people/{id}/recipes IN: - OUT: application/json
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id}/recipes")
+    public Response getRecipes(@PathParam("id") long id) {
+        // Implementation to get recipes associated with a person
+    }
+
+    /**
+     * HTTP Signature: GET people/{id}/ingredient-types IN: - OUT: application/json
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id}/ingredient-types")
+    public Response getIngredientTypes(@PathParam("id") long id) {
+        // Implementation to get ingredient types associated with a person
+    }
+}

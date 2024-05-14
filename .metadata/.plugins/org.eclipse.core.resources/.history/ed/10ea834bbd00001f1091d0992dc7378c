@@ -1,7 +1,0 @@
-package edu.sb.cookbook.persistence;
-
-
-public enum Restriction {
-	
-}
-
