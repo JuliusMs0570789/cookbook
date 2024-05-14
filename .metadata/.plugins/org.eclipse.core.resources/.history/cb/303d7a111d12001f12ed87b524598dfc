@@ -68,40 +68,55 @@ public class PersonService {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response createOrUpdatePerson(@HeaderParam("X-Requester-Identity") @Positive long requesterIdentity,
-			Person person) {
+	public Response createOrUpdatePerson(
+			// Inserts or updates a person from template data within the HTTP request body.
+			@HeaderParam("X-Requester-Identity") @Positive long requesterIdentity, Person person) {
 		try {
+			// Make sure non-administrators cannot upgrade their group.
 			if (!isAdministrator(requesterIdentity) && requesterIdentity != person.getIdentity()) {
 				return Response.status(Response.Status.FORBIDDEN)
 						.entity("Only administrators or the person itself may perform this operation.").build();
 			}
 
+			// It creates a new person if the given template's identity is zero, which
+			// solely admins may perform.
+			// Otherwise it updates the corresponding person with the given template data
 			if (person.getIdentity() == 0) {
+				// Ensure that only administrators can create a new person with identity zero
 				if (!isAdministrator(requesterIdentity)) {
 					return Response.status(Response.Status.FORBIDDEN)
 							.entity("Only administrators may create a new person with identity zero.").build();
 				}
+				// The default avatar with ID 1 shall be associated during creation if none is
+				// provided.
 				Document defaultAvatar = entityManager.find(Document.class, 1);
 				person.setAvatar(defaultAvatar);
 
 				entityManager.persist(person);
 			} else {
+				// If the person's identity is not zero, update the existing person with the
+				// given template data
 				Person existingPerson = entityManager.find(Person.class, person.getIdentity());
 				if (existingPerson == null) {
 					return Response.status(Response.Status.NOT_FOUND)
 							.entity("Person not found for the provided identity.").build();
 				}
+				// Ensure that only administrators or the person itself can update the person's
+				// data
 				if (!isAdministrator(requesterIdentity) && requesterIdentity != existingPerson.getIdentity()) {
 					return Response.status(Response.Status.FORBIDDEN)
 							.entity("Only administrators or the person itself may update this person's data.").build();
 				}
+				// Set the avatar if none is provided
 				if (person.getAvatar() == null) {
 					Document defaultAvatar = entityManager.find(Document.class, 1);
 					person.setAvatar(defaultAvatar);
 				}
-
+				// Update the existing person with the template data
 				existingPerson.setEmail(person.getEmail());
 				existingPerson.setAvatar(person.getAvatar());
+				// TODO: what to update?
+
 				entityManager.merge(existingPerson);
 			}
 
@@ -133,6 +148,7 @@ public class PersonService {
 						.entity("Only administrators or the person itself may perform this operation.").build();
 			}
 
+			// Dissociate associated recipes and ingredient types
 			person.getRecipes().forEach(recipe -> recipe.setOwner(null));
 			person.getIngredientTypes().forEach(ingredientType -> ingredientType.setOwner(null));
 

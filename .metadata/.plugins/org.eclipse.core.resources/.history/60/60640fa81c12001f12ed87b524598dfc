@@ -110,5 +110,10 @@ public class BasicAuthenticationReceiverFilter implements ContainerRequestFilter
         requestContext.abortWith(Response.status(UNAUTHORIZED).header(WWW_AUTHENTICATE, "Basic").build());
 		// TODO:
 	
+		
+		
+
+
+	
 	}
 }

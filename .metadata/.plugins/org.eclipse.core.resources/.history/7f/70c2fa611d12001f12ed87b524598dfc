@@ -68,48 +68,48 @@ public class PersonService {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response createOrUpdatePerson(@HeaderParam("X-Requester-Identity") @Positive long requesterIdentity,
-			Person person) {
-		try {
-			if (!isAdministrator(requesterIdentity) && requesterIdentity != person.getIdentity()) {
-				return Response.status(Response.Status.FORBIDDEN)
-						.entity("Only administrators or the person itself may perform this operation.").build();
-			}
+	public Response createOrUpdatePerson(@HeaderParam("X-Requester-Identity") @Positive long requesterIdentity, Person person) {
+        try {
+            if (!isAdministrator(requesterIdentity) && requesterIdentity != person.getIdentity()) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity("Only administrators or the person itself may perform this operation.").build();
+            }
 
-			if (person.getIdentity() == 0) {
-				if (!isAdministrator(requesterIdentity)) {
-					return Response.status(Response.Status.FORBIDDEN)
-							.entity("Only administrators may create a new person with identity zero.").build();
-				}
-				Document defaultAvatar = entityManager.find(Document.class, 1);
-				person.setAvatar(defaultAvatar);
+            if (person.getIdentity() == 0) {
+                if (!isAdministrator(requesterIdentity)) {
+                    return Response.status(Response.Status.FORBIDDEN)
+                            .entity("Only administrators may create a new person with identity zero.").build();
+                }
+                Document defaultAvatar = entityManager.find(Document.class, 1);
+                person.setAvatar(defaultAvatar);
 
-				entityManager.persist(person);
-			} else {
-				Person existingPerson = entityManager.find(Person.class, person.getIdentity());
-				if (existingPerson == null) {
-					return Response.status(Response.Status.NOT_FOUND)
-							.entity("Person not found for the provided identity.").build();
-				}
-				if (!isAdministrator(requesterIdentity) && requesterIdentity != existingPerson.getIdentity()) {
-					return Response.status(Response.Status.FORBIDDEN)
-							.entity("Only administrators or the person itself may update this person's data.").build();
-				}
-				if (person.getAvatar() == null) {
-					Document defaultAvatar = entityManager.find(Document.class, 1);
-					person.setAvatar(defaultAvatar);
-				}
+                entityManager.persist(person);
+            } else {
+                Person existingPerson = entityManager.find(Person.class, person.getIdentity());
+                if (existingPerson == null) {
+                    return Response.status(Response.Status.NOT_FOUND)
+                            .entity("Person not found for the provided identity.").build();
+                }
+                if (!isAdministrator(requesterIdentity) && requesterIdentity != existingPerson.getIdentity()) {
+                    return Response.status(Response.Status.FORBIDDEN)
+                            .entity("Only administrators or the person itself may update this person's data.").build();
+                }
+                if (person.getAvatar() == null) {
+                    Document defaultAvatar = entityManager.find(Document.class, 1);
+                    person.setAvatar(defaultAvatar);
+                }
 
-				existingPerson.setEmail(person.getEmail());
-				existingPerson.setAvatar(person.getAvatar());
-				entityManager.merge(existingPerson);
-			}
+                existingPerson.setEmail(person.getEmail());
+                existingPerson.setAvatar(person.getAvatar());
+                entityManager.merge(existingPerson);
+            }
 
-			return Response.ok(person.getIdentity()).build();
-		} catch (Exception e) {
-			return Response.serverError().entity(e.getMessage()).build();
-		}
-	}
+            return Response.ok(person.getIdentity()).build();
+        } catch (Exception e) {
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+    }
+
 
 	/**
 	 * HTTP Signature: DELETE people/{id} (in: -, out: text/plain) Deletes the
@@ -133,6 +133,7 @@ public class PersonService {
 						.entity("Only administrators or the person itself may perform this operation.").build();
 			}
 
+			// Dissociate associated recipes and ingredient types
 			person.getRecipes().forEach(recipe -> recipe.setOwner(null));
 			person.getIngredientTypes().forEach(ingredientType -> ingredientType.setOwner(null));
 
