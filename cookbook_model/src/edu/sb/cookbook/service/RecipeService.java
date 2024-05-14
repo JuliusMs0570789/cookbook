@@ -1,5 +1,8 @@
 package edu.sb.cookbook.service;
 
+import static edu.sb.cookbook.service.BasicAuthenticationReceiverFilter.REQUESTER_IDENTITY;
+
+import javax.validation.constraints.Positive;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
@@ -16,12 +19,14 @@ public class RecipeService {
 	
 	/**
 	 * HTTP Signature: POST recipes IN: application/json OUT: text/plain
+	 * @return the recipe identity
 	 */
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.TEXT_PLAIN)
-	public void createOrInsertRecipe () {
+	public long createOrInsertRecipe () {
 		// TODO
+		return 15l;
 	}
 	
 	/**
@@ -30,7 +35,10 @@ public class RecipeService {
 	@DELETE
 	@Produces(MediaType.TEXT_PLAIN)
 	@Path("{id}")
-	public void deleteRecipe () {
+	public void removeRecipe (
+		@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
+		@PathParam("id") @Positive final long recipeIdentity
+	) {
 		// TODO
 	}
 	
@@ -40,7 +48,9 @@ public class RecipeService {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("{id}")
-	public void findRecipe () {
+	public void findRecipe (
+		@PathParam("id") @Positive final long recipeIdentity
+	) {
 		// TODO
 	}
 	
@@ -50,7 +60,9 @@ public class RecipeService {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("{id}/illustrations")
-	public void getIllustrations () {
+	public void getIllustrations (
+		@PathParam("id") @Positive final long recipeIdentity
+	) {
 		// TODO
 	}
 	
@@ -60,49 +72,73 @@ public class RecipeService {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("{id}/ingredients")
-	public void getIngredients () {
+	public void getIngredients (
+		@PathParam("id") @Positive final long recipeIdentity
+	) {
 		// TODO
 	}
 	
 	/**
 	 * HTTP Signature: POST recipes/{id}/illustrations IN: application/json OUT: text/plain
+	 * @return the recipe identity
 	 */
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.TEXT_PLAIN)
 	@Path("{id}/illustrations")
-	public void addIllustration () {
+	public long addIllustration (
+		@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
+		@PathParam("id") @Positive final long recipeIdentity
+	) {
 		// TODO
+		return 15l;
 	}
 	
 	/**
 	 * HTTP Signature: POST recipes/{id}/ingredients IN: application/json OUT: text/plain
+	 * @return the recipe identity
 	 */
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.TEXT_PLAIN)
 	@Path("{id}/ingredients")
-	public void addIngredient () {
+	public long addIngredient (
+		@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
+		@PathParam("id") @Positive final long recipeIdentity
+	) {
 		// TODO
+		return 15l;
 	}
 	
 	/**
 	 * HTTP Signature: DELETE recipes/{id1}/illustrations/{id2} IN: - OUT: text/plain
+	 * @return the Document identity
 	 */
 	@DELETE
 	@Produces(MediaType.TEXT_PLAIN)
 	@Path("{id1}/illustrations/{id2}")
-	public void dissacociateIllustration () {
+	public long dissacociateIllustration (
+		@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
+		@PathParam("id1") @Positive final long recipeIdentity,
+		@PathParam("id2") @Positive final long illustrationIdentity
+	) {
 		// TODO
+		return 15l;
 	}
 	
 	/**
 	 * HTTP Signature: DELETE recipes/{id1}/ingredients/{id2} IN: - OUT: text/plain
+	 * @return the Document identity
 	 */
 	@DELETE
 	@Produces(MediaType.TEXT_PLAIN)
 	@Path("{id1}/ingredients/{id2}")
-	public void removeIngredient () {
+	public long removeIngredient (
+		@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
+		@PathParam("id1") @Positive final long recipeIdentity,
+		@PathParam("id2") @Positive final long illustrationIdentity
+	) {
 		// TODO
+		return 15l;
 	}
 }
