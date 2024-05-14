@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTransient;
+import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
@@ -24,10 +26,13 @@ import javax.validation.constraints.Size;
 
 import org.eclipse.persistence.annotations.CacheIndex;
 
+import edu.sb.tool.JsonProtectedPropertyStrategy;
+
 @Entity
 @Table(schema="cookbook", name="Recipe", indexes={})
 @PrimaryKeyJoinColumn(name="recipeIdentity")
 @DiscriminatorValue("Recipe")
+@JsonbVisibility(JsonProtectedPropertyStrategy.class)
 public class Recipe extends BaseEntity {
 	static public enum Category {
 		MAIN_COURSE, APPETIZER, SNACK, DESSERT, BREAKFAST, BUFFET, BARBEQUE, ADOLESCENT, INFANT		
@@ -86,7 +91,7 @@ public class Recipe extends BaseEntity {
 	}
 	
 	
-	@JsonbProperty
+	@JsonbTransient
 	public Document getAvatar () {
 		return this.avatar;
 	}
@@ -95,7 +100,7 @@ public class Recipe extends BaseEntity {
 		this.avatar = avatar;
 	}
 	
-	@JsonbProperty
+	@JsonbTransient
 	public Person getOwner () {
 		return this.owner;
 	}
@@ -104,7 +109,7 @@ public class Recipe extends BaseEntity {
 		this.owner = owner;
 	}
 	
-	@JsonbProperty
+	@JsonbTransient
 	public Set<Ingredient> getIngredients () {
 		return this.ingredients;
 	}
@@ -113,7 +118,7 @@ public class Recipe extends BaseEntity {
 		this.ingredients = ingredients;
 	}
 	
-	@JsonbProperty
+	@JsonbTransient
 	public Set<Document> getIllustrations () {
 		return this.illustrations;
 	}
@@ -122,6 +127,7 @@ public class Recipe extends BaseEntity {
 		this.illustrations = illustrations;
 	}
 	
+	@JsonbProperty
 	public Recipe.Category getCategory() {
 		return this.category;
 	}
@@ -157,6 +163,17 @@ public class Recipe extends BaseEntity {
 		this.instruction = instruction;
 	}
 	
+	@JsonbProperty
+	protected Long getOwnerReference(){
+		return this.owner == null ? null : this.owner.getIdentity();
+	}
+	
+	@JsonbProperty
+	protected int getIngredientCount(){
+		return ingredients.toArray().length;
+	}
+	
+	@JsonbProperty
 	public Restriction getRestriction() {
 		return this.ingredients.stream().map(Ingredient::getType).map(IngredientType::getRestriction).min(Comparator.naturalOrder()).orElse(Restriction.VEGAN);
     }
