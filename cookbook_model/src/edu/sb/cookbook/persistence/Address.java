@@ -1,16 +1,16 @@
 package edu.sb.cookbook.persistence;
 
 import java.util.Comparator;
-
 import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.Size;
 
-@Embeddable
-// @Table(schema="cookbook", name="Address", indexes={})
-// @DiscriminatorValue("Address") -> ist keine Entität
+import edu.sb.tool.JsonProtectedPropertyStrategy;
 
+@Embeddable
+@JsonbVisibility(JsonProtectedPropertyStrategy.class)
 public class Address implements Comparable<Address> {
 	
 	static public final Comparator<Address> COMPARATOR = Comparator
