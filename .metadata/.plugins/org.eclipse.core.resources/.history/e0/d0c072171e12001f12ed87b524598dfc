@@ -99,16 +99,10 @@ public class PersonService {
 					Document defaultAvatar = entityManager.find(Document.class, 1);
 					person.setAvatar(defaultAvatar);
 				}
-				
-				// TODO: What else to update?
 
 				existingPerson.setEmail(person.getEmail());
 				existingPerson.setAvatar(person.getAvatar());
-				
-				// TODO: Set password
-				
 				entityManager.merge(existingPerson);
-				
 			}
 
 			return Response.ok(person.getIdentity()).build();

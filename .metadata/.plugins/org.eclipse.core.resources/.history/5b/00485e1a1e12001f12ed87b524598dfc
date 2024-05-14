@@ -146,7 +146,7 @@ public class PersonService {
 			return Response.ok().build();
 		} catch (Exception e) {
 			return Response.serverError().entity(e.getMessage()).build();
-		}
+		}s
 	}
 
 	/**
