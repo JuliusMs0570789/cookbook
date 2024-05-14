@@ -1,6 +1,8 @@
 package edu.sb.cookbook.persistence;
 
 import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTransient;
+import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -12,11 +14,13 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
+import edu.sb.tool.JsonProtectedPropertyStrategy;
 
 @Entity
 @Table(schema="cookbook", name="Ingredient", indexes={})
 @PrimaryKeyJoinColumn(name="ingredientIdentity")
 @DiscriminatorValue("Ingredient")
+@JsonbVisibility(JsonProtectedPropertyStrategy.class)
 public class Ingredient extends BaseEntity {	
 	static public enum Unit {
 		LITRE, GRAM, TEASPOON, TABLESPOON, PINCH, CUP, CAN, TUBE, BUSHEL, PIECE		
@@ -49,7 +53,7 @@ public class Ingredient extends BaseEntity {
 		this.unit = Unit.GRAM;
 	}
 	
-	@JsonbProperty
+	@JsonbTransient
 	public Recipe getRecipe () {
 		return this.recipe;
 	}
@@ -58,7 +62,7 @@ public class Ingredient extends BaseEntity {
 		this.recipe = recipe;
 	}
 	
-	@JsonbProperty
+	@JsonbTransient 
 	public IngredientType getType () {
 		return this.type;
 	}
@@ -83,5 +87,10 @@ public class Ingredient extends BaseEntity {
 	
 	public void setUnit (final Unit unit) {
 		this.unit = unit;
+	}
+	
+	@JsonbProperty
+	protected Long getRecipeReference() {
+		return this.recipe == null ? null : this.recipe.getIdentity();
 	}
 }
