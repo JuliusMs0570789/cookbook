@@ -32,23 +32,41 @@ public class RecipeService {
 			+ "(:upperNumber is null or r.number <= :upperNumber) and "
 			+ "(:title is null or r.title = :title) and "
 			+ "(:description is null or r.description = :description) and "
-			+ "(:instrcution is null or r.instrcution like :instrcution)";
+			+ "(:instrcution is null or r.instruction like :instruction)";
 	
 	/**
 	 * HTTP Signature: GET recipes IN: - OUT: application/json
 	 */
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public void queryRecipes (
+	public Recipe[] queryRecipes (
 			@QueryParam("result-offset") @PositiveOrZero Integer resultOffset,
-			@QueryParam("result-limit") @PositiveOrZero Integer resultLimit
+			@QueryParam("result-limit") @PositiveOrZero Integer resultLimit,
+			@QueryParam("lower-number") final String lowerNumber,
+			@QueryParam("upper-number") final String upperNumber,
+			@QueryParam("title") final String title,
+			@QueryParam("description") final String description,
+			@QueryParam("instruction") final String instruction
 	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final TypedQuery<Long> query = entityManager.createQuery(QUERY_RECIPES, Long.class);
 		if (resultOffset != null) query.setFirstResult(resultOffset);
 		if (resultLimit != null) query.setMaxResults(resultLimit);
 		
-		// TODO
+		final Recipe[] recipes = query
+				.setParameter("lowerNumber", lowerNumber)
+				.setParameter("upperNumber", upperNumber)
+				.setParameter("title", title)
+				.setParameter("description", description)
+				.setParameter("instruction", instruction)
+				.getResultList()
+				.stream()
+				.map(identity -> entityManager.find(Recipe.class, identity))
+				.filter(recipe -> recipe != null)
+				.sorted()
+				.toArray(Recipe[]::new);
+
+		return recipes;
 	}
 	
 	/**
