@@ -30,7 +30,7 @@ public class RecipeService {
 			+ "(:upperNumber is null or r.number <= :upperNumber) and "
 			+ "(:title is null or r.title = :title) and "
 			+ "(:description is null or r.description = :description) and "
-			+ "(:instrcution is null or r.instruction like :instruction)";
+			+ "(:instruction is null or r.instruction like :instruction)";
 	
 	/**
 	 * HTTP Signature: GET recipes IN: - OUT: application/json
@@ -154,7 +154,6 @@ public class RecipeService {
 
 		try {
 			entityManager.remove(recipe);
-
 			entityManager.getTransaction().commit();
 		} catch (final Exception e) {
 			if (entityManager.getTransaction().isActive())
@@ -307,7 +306,9 @@ public class RecipeService {
 	
 	/**
 	 * HTTP Signature: DELETE recipes/{id1}/illustrations/{id2} IN: - OUT: text/plain
-	 * @return the Document identity
+	 * @param id1 the recipeIdentity
+	 * @param id2 the illustrationIdentity
+	 * @return the Recipe identity
 	 */
 	@DELETE
 	@Produces(MediaType.TEXT_PLAIN)
@@ -325,13 +326,26 @@ public class RecipeService {
 		if (recipe == null) throw new ClientErrorException(Status.NOT_FOUND);
 		if (requester.getGroup() != Group.ADMIN && requester != recipe.getOwner()) throw new ClientErrorException(Status.FORBIDDEN);
 		
-		// TODO
-		return 15l;
+		long[] illustrationIds = recipe.getIllustrations().stream()
+                .mapToLong(Document::getIdentity)
+                .toArray();
+		
+		final Set<Document> illustrationsToKeep = LongStream
+				.of(illustrationIds)
+				.mapToObj(ref -> entityManager.find(Document.class, ref))
+				.filter(document -> document.getIdentity() != illustrationIdentity)
+				.collect(Collectors.toSet());
+			
+			recipe.getIllustrations().retainAll(illustrationsToKeep);
+			recipe.getIllustrations().addAll(illustrationsToKeep);
+		
+
+		return recipe.getIdentity();
 	}
 	
 	/**
 	 * HTTP Signature: DELETE recipes/{id1}/ingredients/{id2} IN: - OUT: text/plain
-	 * @return the Document identity
+	 * @return the recipe identity
 	 */
 	@DELETE
 	@Produces(MediaType.TEXT_PLAIN)
@@ -349,8 +363,19 @@ public class RecipeService {
 		if (recipe == null) throw new ClientErrorException(Status.NOT_FOUND);
 		if (requester.getGroup() != Group.ADMIN && requester != recipe.getOwner()) throw new ClientErrorException(Status.FORBIDDEN);
 		
-		// TODO
-		return 15l;
+		long[] ingredientIds = recipe.getIngredients().stream()
+                .mapToLong(Ingredient::getIdentity)
+                .toArray();
+		
+		final Set<Document> illustrationsToKeep = LongStream
+				.of(ingredientIds)
+				.mapToObj(ref -> entityManager.find(Document.class, ref))
+				.filter(document -> document.getIdentity() != illustrationIdentity)
+				.collect(Collectors.toSet());
+			
+			recipe.getIllustrations().retainAll(illustrationsToKeep);
+			recipe.getIllustrations().addAll(illustrationsToKeep);
+
+		return recipe.getIdentity();
 	}
 }
-
