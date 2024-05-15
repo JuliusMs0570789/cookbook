@@ -3,7 +3,8 @@ package edu.sb.cookbook.service;
 import static edu.sb.cookbook.service.BasicAuthenticationReceiverFilter.REQUESTER_IDENTITY;
 
 import java.util.Set;
-
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import javax.persistence.Cache;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -11,17 +12,14 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import javax.validation.constraints.Size;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
-
 import edu.sb.cookbook.persistence.Document;
 import edu.sb.cookbook.persistence.Ingredient;
 import edu.sb.cookbook.persistence.IngredientType;
 import edu.sb.cookbook.persistence.Person;
 import edu.sb.cookbook.persistence.Recipe;
-import edu.sb.cookbook.persistence.Restriction;
 import edu.sb.cookbook.persistence.Person.Group;
 import edu.sb.tool.RestJpaLifecycleProvider;
 
@@ -50,6 +48,7 @@ public class RecipeService {
 	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final TypedQuery<Long> query = entityManager.createQuery(QUERY_RECIPES, Long.class);
+		
 		if (resultOffset != null) query.setFirstResult(resultOffset);
 		if (resultLimit != null) query.setMaxResults(resultLimit);
 		
@@ -236,7 +235,7 @@ public class RecipeService {
 	public long addIllustration (
 		@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
 		@PathParam("id") @Positive final long recipeIdentity,
-		@QueryParam("illustration") final Document documentIllustration
+		@QueryParam("illustrations") final long[] documentIllustrations
 	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final Person requester = entityManager.find(Person.class, requesterIdentity);
@@ -246,16 +245,21 @@ public class RecipeService {
 		if (recipe == null) throw new ClientErrorException(Status.NOT_FOUND);
 		if (requester.getGroup() != Group.ADMIN && requester != recipe.getOwner()) throw new ClientErrorException(Status.FORBIDDEN);
 		
-		recipe.setModified(System.currentTimeMillis());
+		final Set<Document> illustrations = LongStream
+			.of(documentIllustrations)
+			.mapToObj(ref -> entityManager.find(Document.class, ref))
+			.filter(document -> document != null)
+			.collect(Collectors.toSet());
 		
-		Set<Document> illustrations = recipe.getIllustrations();
-		
-		// TODO: validate new ingredient, throw error in case it is not valid
-		
-		// TODO: add new ingredient to ingredients
-				
-		// TODO: set new ingredients on recipe	
-		// recipe.setIngredients(illustrations);
+		recipe.getIllustrations().retainAll(illustrations);
+		recipe.getIllustrations().addAll(illustrations);
+
+		try {
+			entityManager.flush();
+			entityManager.getTransaction().commit();
+		} finally {
+			entityManager.getTransaction().begin();
+		}
 		
 		return recipe.getIdentity();
 	}
@@ -272,7 +276,7 @@ public class RecipeService {
 	public long addIngredient (
 		@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
 		@PathParam("id") @Positive final long recipeIdentity,
-		@QueryParam("ingredient") final Ingredient documentIngredient
+		@QueryParam("ingredients") final long[] ingredientsParam
 	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final Person requester = entityManager.find(Person.class, requesterIdentity);
@@ -281,17 +285,22 @@ public class RecipeService {
 		final Recipe recipe = entityManager.find(Recipe.class, recipeIdentity);
 		if (recipe == null) throw new ClientErrorException(Status.NOT_FOUND);
 		if (requester.getGroup() != Group.ADMIN && requester != recipe.getOwner()) throw new ClientErrorException(Status.FORBIDDEN);
-				
-		recipe.setModified(System.currentTimeMillis());
 		
-		Set<Ingredient> ingredients = recipe.getIngredients();
+		final Set<Ingredient> ingredients = LongStream
+			.of(ingredientsParam)
+			.mapToObj(ref -> entityManager.find(Ingredient.class, ref))
+			.filter(ingredient -> ingredient != null)
+			.collect(Collectors.toSet());
 		
-		// TODO: validate new ingredient, throw error in case it is not valid
-		
-		// TODO: add new ingredient to ingredients
-		
-		// TODO: set new ingredients on recipe	
-		// recipe.setIngredients(illustrations);
+		recipe.getIngredients().retainAll(ingredients);
+		recipe.getIngredients().addAll(ingredients);
+
+		try {
+			entityManager.flush();
+			entityManager.getTransaction().commit();
+		} finally {
+			entityManager.getTransaction().begin();
+		}
 		
 		return recipe.getIdentity();
 	}
@@ -344,3 +353,4 @@ public class RecipeService {
 		return 15l;
 	}
 }
+
