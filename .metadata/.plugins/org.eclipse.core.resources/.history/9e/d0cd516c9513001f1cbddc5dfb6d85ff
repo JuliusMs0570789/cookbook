@@ -86,23 +86,9 @@ public class PersonService {
 		query.setParameter("postcode", postcode);
 		query.setParameter("city", city);
 		query.setParameter("country", country);
-		query.setParameter("minCreated", minCreated);
-		query.setParameter("maxCreated", maxCreated);
-		query.setParameter("minModified", minModified);
-		query.setParameter("maxModified", maxModified);
-		query.setParameter("email", email);
-		query.setParameter("group", group);
-		query.setParameter("title", title);
-		query.setParameter("givenName", givenName);
-		query.setParameter("familyName", familyName);
-		query.setParameter("street", street);
-		query.setParameter("postcode", postcode);
-		query.setParameter("city", city);
-		query.setParameter("country", country);
-		if (phones != null) query.setParameter("phones", phones);
-		if (recipeIds != null) query.setParameter("recipes", recipeIds);
-		if (ingredientTypeIds != null) query.setParameter("ingredientTypes", ingredientTypeIds);
-
+		query.setParameter("phones", phones);
+		query.setParameter("recipes", recipeIds);
+		query.setParameter("ingredientTypes", ingredientTypeIds);
 
 		final List<Person> people = query.getResultList().stream()
 				.map(identity -> entityManager.find(Person.class, identity)).filter(type -> type != null)
@@ -226,17 +212,18 @@ public class PersonService {
 			throw new ClientErrorException(Status.FORBIDDEN);
 
 		try {
-		    entityManager.getTransaction().begin();
-		    // Set owner of recipes and ingredient types to null
-		    person.getRecipes().forEach(recipe -> recipe.setOwner(null));
-		    person.getIngredientTypes().forEach(type -> type.setOwner(null));
+			// Set owner of recipes and ingredient types to null
+			person.getRecipes().forEach(recipe -> recipe.setOwner(null));
+			person.getIngredientTypes().forEach(type -> type.setOwner(null));
 
-		    entityManager.remove(person);
-		    entityManager.getTransaction().commit();
+			entityManager.remove(person);
+			entityManager.getTransaction().commit();
 		} catch (final Exception e) {
-		    if (entityManager.getTransaction().isActive())
-		        entityManager.getTransaction().rollback();
-		    throw new ClientErrorException(Status.CONFLICT, e);
+			if (entityManager.getTransaction().isActive())
+				entityManager.getTransaction().rollback();
+			throw new ClientErrorException(Status.CONFLICT, e);
+		} finally {
+			entityManager.getTransaction().begin();
 		}
 
 		final Cache secondLevelCache = entityManager.getEntityManagerFactory().getCache();
