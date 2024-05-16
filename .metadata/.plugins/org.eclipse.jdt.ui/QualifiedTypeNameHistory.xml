@@ -2,4 +2,5 @@
 <qualifiedTypeNameHistroy>
     <fullyQualifiedTypeName name="edu.sb.cookbook.persistence.Recipe.category"/>
     <fullyQualifiedTypeName name="edu.sb.cookbook.persistence.Recipe.Category"/>
+    <fullyQualifiedTypeName name="edu.sb.cookbook.persistence.Person.Group"/>
 </qualifiedTypeNameHistroy>
