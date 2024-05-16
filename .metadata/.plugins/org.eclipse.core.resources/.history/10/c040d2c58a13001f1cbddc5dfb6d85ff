@@ -126,41 +126,36 @@ public class PersonService {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.TEXT_PLAIN)
-	// TODO: Password/Admin stuff missing
-	public long createOrUpdatePerson(@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
-			@NotNull @Valid final Person personTemplate) {
+	public long createOrUpdatePerson(
+			@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
+			@NotNull @Valid final Person personTemplate
+			) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final Person requester = entityManager.find(Person.class, requesterIdentity);
-		if (requester == null)
-			throw new ClientErrorException(Status.FORBIDDEN);
+		if (requester == null) throw new ClientErrorException(Status.FORBIDDEN);
 		final boolean insertMode = personTemplate.getIdentity() == 0L;
 
 		final Person person;
 		final Document avatar;
-
+		
 		if (insertMode) {
 			person = requester;
-			avatar = entityManager.find(Document.class,
-					personTemplate.getAvatar() == null ? 1L : personTemplate.getAvatar().getIdentity());
+			avatar = entityManager.find(Document.class, personTemplate.getAvatar() == null ? 1L : personTemplate.getAvatar().getIdentity());
 		} else {
 			person = entityManager.find(Person.class, personTemplate.getIdentity());
-			if (person == null)
-				throw new ClientErrorException(Status.NOT_FOUND);
-			avatar = personTemplate.getAvatar() == null ? person.getAvatar()
-					: entityManager.find(Document.class, personTemplate.getAvatar().getIdentity());
+			if (person == null) throw new ClientErrorException(Status.NOT_FOUND);
+			avatar = personTemplate.getAvatar() == null ? person.getAvatar() : entityManager.find(Document.class, personTemplate.getAvatar().getIdentity());
 		}
-
-		if (requester.getGroup() != Group.ADMIN && person != requester)
-			throw new ClientErrorException(Status.FORBIDDEN);
-		if (avatar == null)
-			throw new ClientErrorException(Status.NOT_FOUND);
+		
+		if (requester.getGroup() != Group.ADMIN && person != requester) throw new ClientErrorException(Status.FORBIDDEN);
+		if (avatar == null) throw new ClientErrorException(Status.NOT_FOUND);
 
 		person.setModified(System.currentTimeMillis());
 		person.setVersion(personTemplate.getVersion());
 		person.setEmail(personTemplate.getEmail());
 		person.setPasswordHash(personTemplate.getPasswordHash());
 		person.setAvatar(personTemplate.getAvatar());
-
+		
 		try {
 			if (insertMode)
 				entityManager.persist(person);
@@ -175,10 +170,9 @@ public class PersonService {
 		} finally {
 			entityManager.getTransaction().begin();
 		}
-
+		
 		final Cache secondLevelCache = entityManager.getEntityManagerFactory().getCache();
-		if (insertMode)
-			secondLevelCache.evict(Person.class, requester.getIdentity());
+		if (insertMode) secondLevelCache.evict(Person.class, requester.getIdentity());
 
 		return person.getIdentity();
 	}
@@ -236,13 +230,8 @@ public class PersonService {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("{id}")
-	public Person findPerson(@PathParam("id") @Positive final long personIdentity) {
-		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
-		final Person person = entityManager.find(Person.class, personIdentity);
-		if (person == null)
-			throw new ClientErrorException(Status.NOT_FOUND);
-
-		return person;
+	public void findPerson() {
+		// TODO
 	}
 
 	/**
@@ -253,7 +242,6 @@ public class PersonService {
 	@GET
 	@Path("{requester}")
 	@Produces(MediaType.APPLICATION_JSON)
-	// TODO: currently the same as findPerson()
 	public Person findRequester(@PathParam("requester") @Positive final long personIdentity) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final Person person = entityManager.find(Person.class, personIdentity);
@@ -268,38 +256,38 @@ public class PersonService {
 	 * the recipes associated with an owner matching the given identity, sorted by
 	 * ID.
 	 */
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("{id}/recipes")
-	public Recipe[] getRecipes(@PathParam("id") @Positive final long personIdentity) {
-		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
-		final Person person = entityManager.find(Person.class, personIdentity);
-		if (person == null)
-			throw new ClientErrorException(Status.NOT_FOUND);
+	 @GET
+	    @Produces(MediaType.APPLICATION_JSON)
+	    @Path("{id}/recipes")
+	    public Recipe[] getRecipes(@PathParam("id") @Positive final long personIdentity) {
+	        final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
+	        final Person person = entityManager.find(Person.class, personIdentity);
+	        if (person == null) throw new ClientErrorException(Status.NOT_FOUND);
 
-		List<Recipe> recipes = person.getRecipes().stream()
-				.sorted((r1, r2) -> Long.compare(r1.getIdentity(), r2.getIdentity())).collect(Collectors.toList());
+	        List<Recipe> recipes = person.getRecipes().stream()
+	                .sorted((r1, r2) -> Long.compare(r1.getIdentity(), r2.getIdentity()))
+	                .collect(Collectors.toList());
 
-		return recipes.toArray(new Recipe[0]);
-	}
+	        return recipes.toArray(new Recipe[0]);
+	    }
 
 	/**
 	 * HTTP Signature: GET people/{id}/ingredient-types IN: - OUT: application/json
 	 * Returns the ingredient types associated with an owner matching the given
 	 * identity, sorted by ID.
 	 */
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("{id}/ingredient-types")
-	public IngredientType[] getIngredientTypes(@PathParam("id") @Positive final long personIdentity) {
-		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
-		final Person person = entityManager.find(Person.class, personIdentity);
-		if (person == null)
-			throw new ClientErrorException(Status.NOT_FOUND);
+	 @GET
+	    @Produces(MediaType.APPLICATION_JSON)
+	    @Path("{id}/ingredient-types")
+	    public IngredientType[] getIngredientTypes(@PathParam("id") @Positive final long personIdentity) {
+	        final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
+	        final Person person = entityManager.find(Person.class, personIdentity);
+	        if (person == null) throw new ClientErrorException(Status.NOT_FOUND);
 
-		List<IngredientType> ingredientTypes = person.getIngredientTypes().stream()
-				.sorted((i1, i2) -> Long.compare(i1.getIdentity(), i2.getIdentity())).collect(Collectors.toList());
+	        List<IngredientType> ingredientTypes = person.getIngredientTypes().stream()
+	                .sorted((i1, i2) -> Long.compare(i1.getIdentity(), i2.getIdentity()))
+	                .collect(Collectors.toList());
 
-		return ingredientTypes.toArray(new IngredientType[0]);
-	}
+	        return ingredientTypes.toArray(new IngredientType[0]);
+	    }
 }

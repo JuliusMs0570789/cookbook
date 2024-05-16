@@ -126,7 +126,6 @@ public class PersonService {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.TEXT_PLAIN)
-	// TODO: Password/Admin stuff missing
 	public long createOrUpdatePerson(@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
 			@NotNull @Valid final Person personTemplate) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
@@ -236,13 +235,8 @@ public class PersonService {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("{id}")
-	public Person findPerson(@PathParam("id") @Positive final long personIdentity) {
-		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
-		final Person person = entityManager.find(Person.class, personIdentity);
-		if (person == null)
-			throw new ClientErrorException(Status.NOT_FOUND);
-
-		return person;
+	public void findPerson() {
+		// TODO
 	}
 
 	/**
@@ -253,7 +247,6 @@ public class PersonService {
 	@GET
 	@Path("{requester}")
 	@Produces(MediaType.APPLICATION_JSON)
-	// TODO: currently the same as findPerson()
 	public Person findRequester(@PathParam("requester") @Positive final long personIdentity) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final Person person = entityManager.find(Person.class, personIdentity);

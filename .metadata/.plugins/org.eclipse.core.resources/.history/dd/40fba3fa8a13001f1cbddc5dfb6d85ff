@@ -126,7 +126,6 @@ public class PersonService {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.TEXT_PLAIN)
-	// TODO: Password/Admin stuff missing
 	public long createOrUpdatePerson(@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
 			@NotNull @Valid final Person personTemplate) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
