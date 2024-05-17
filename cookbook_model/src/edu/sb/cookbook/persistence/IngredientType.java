@@ -49,13 +49,18 @@ public class IngredientType extends BaseEntity {
 		this.restriction = Restriction.VEGAN; // laut Folie UML-Diagram auf 'NONE'
 	}
 	
-	@JsonbTransient
+	@JsonbProperty
 	public Document getAvatar () {
 		return this.avatar;
 	}
 	
 	public void setAvatar (final Document avatar) {
 		this.avatar = avatar;
+	}
+	
+	@JsonbProperty
+	protected Long getOwnerReference() {
+		return this.owner == null ? null : this.owner.getIdentity();
 	}
 	
 	@JsonbTransient
@@ -92,10 +97,5 @@ public class IngredientType extends BaseEntity {
 	
 	public void setDescription (final String description) {
 		this.description = description;
-	}
-	
-	@JsonbProperty
-	protected Long getOwnerReference() {
-		return this.owner == null ? null : this.owner.getIdentity();
 	}
 }
