@@ -1,10 +1,10 @@
 package edu.sb.cookbook.service;
 
 import static edu.sb.cookbook.service.BasicAuthenticationReceiverFilter.REQUESTER_IDENTITY;
-
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
-
 import javax.persistence.Cache;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -12,10 +12,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import javax.validation.constraints.Size;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
-
 import edu.sb.cookbook.persistence.Document;
 import edu.sb.cookbook.persistence.Ingredient;
 import edu.sb.cookbook.persistence.IngredientType;
@@ -24,8 +24,13 @@ import edu.sb.cookbook.persistence.Person.Group;
 import edu.sb.cookbook.persistence.Recipe;
 import edu.sb.tool.RestJpaLifecycleProvider;
 
-@Path("persons")
+@Path("people")
 public class PersonService {
+	
+	static public final Comparator<Person> PERSON_COMPARATOR = Comparator
+            .comparing(Person::getName)
+			.thenComparing(Person::getEmail);
+	
 	/**
 	 * HTTP Signature: GET people IN: - OUT: application/json Returns the people
 	 * matching the given filter criteria, with missing parameters identifying
@@ -38,88 +43,67 @@ public class PersonService {
 	 * Collection-Streams for the latter two steps.
 	 */
 	static private final String QUERY_PEOPLE = "SELECT p.identity FROM Person AS p WHERE "
+			+ "(:minCreated is null or p.created >= :minCreated) AND "
 			+ "(:maxCreated is null or p.created <= :maxCreated) AND "
 			+ "(:minModified is null or p.modified >= :minModified) AND "
-			+ "(:maxModified is null or p.modified <= :maxModified) AND " + "(:email is null or p.email = :email) AND "
-			+ "(:group is null or p.group = :group) AND " + "(:title is null or p.name.title = :title) AND "
+			+ "(:maxModified is null or p.modified <= :maxModified) AND "
+			+ "(:email is null or p.email = :email) AND "
+			+ "(:group is null or p.group = :group) AND "
+			+ "(:title is null or p.name.title = :title) AND "
 			+ "(:givenName is null or p.name.given = :givenName) AND "
 			+ "(:familyName is null or p.name.family = :familyName) AND "
 			+ "(:street is null or p.address.street = :street) AND "
 			+ "(:postcode is null or p.address.postcode = :postcode) AND "
 			+ "(:city is null or p.address.city = :city) AND "
-			+ "(:country is null or p.address.country = :country) AND "
-			+ "(:phones is null or :phones MEMBER OF p.phones) AND "
-			+ "(:recipes is null or :recipes MEMBER OF p.recipes) AND "
-			+ "(:ingredientTypes is null or :ingredientTypes MEMBER OF p.ingredientTypes)";
+			+ "(:country is null or p.address.country = :country)";
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Person[] queryPeople(@QueryParam("result-offset") @PositiveOrZero final Integer resultOffset,
-			@QueryParam("result-size") @PositiveOrZero final Integer resultSize,
-			@QueryParam("min-created") final Long minCreated, @QueryParam("max-created") final Long maxCreated,
-			@QueryParam("min-modified") final Long minModified, @QueryParam("max-modified") final Long maxModified,
-			@QueryParam("email") final String email, @QueryParam("group") final Group group,
-			@QueryParam("title") final String title, @QueryParam("givenName") final String givenName,
-			@QueryParam("familyName") final String familyName, @QueryParam("street") final String street,
-			@QueryParam("postcode") final String postcode, @QueryParam("city") final String city,
-			@QueryParam("country") final String country, @QueryParam("phones") final List<String> phones,
-			@QueryParam("recipes") final List<Long> recipeIds,
-			@QueryParam("ingredientTypes") final List<Long> ingredientTypeIds) {
-
+	public Person[] queryPeople(
+		@QueryParam("result-offset") @PositiveOrZero final Integer resultOffset,
+		@QueryParam("result-size") @PositiveOrZero final Integer resultSize,
+		@QueryParam("min-created") final Long minCreated,
+		@QueryParam("max-created") final Long maxCreated,
+		@QueryParam("min-modified") final Long minModified,
+		@QueryParam("max-modified") final Long maxModified,
+		@QueryParam("email") @Size(min=1, max=128) final String email,
+		@QueryParam("group") final Group group,
+		@QueryParam("title") final String title,
+		@QueryParam("given-name") final String givenName,
+		@QueryParam("family-name") final String familyName,
+		@QueryParam("street") final String street,
+		@QueryParam("postcode") final String postcode,
+		@QueryParam("city") final String city,
+		@QueryParam("country") final String country
+	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 
 		final TypedQuery<Long> query = entityManager.createQuery(QUERY_PEOPLE, Long.class);
-		if (resultOffset != null)
-			query.setFirstResult(resultOffset);
-		if (resultSize != null)
-			query.setMaxResults(resultSize);
-		query.setParameter("minCreated", minCreated);
-		query.setParameter("maxCreated", maxCreated);
-		query.setParameter("minModified", minModified);
-		query.setParameter("maxModified", maxModified);
-		query.setParameter("email", email);
-		query.setParameter("group", group);
-		query.setParameter("title", title);
-		query.setParameter("givenName", givenName);
-		query.setParameter("familyName", familyName);
-		query.setParameter("street", street);
-		query.setParameter("postcode", postcode);
-		query.setParameter("city", city);
-		query.setParameter("country", country);
-		query.setParameter("minCreated", minCreated);
-		query.setParameter("maxCreated", maxCreated);
-		query.setParameter("minModified", minModified);
-		query.setParameter("maxModified", maxModified);
-		query.setParameter("email", email);
-		query.setParameter("group", group);
-		query.setParameter("title", title);
-		query.setParameter("givenName", givenName);
-		query.setParameter("familyName", familyName);
-		query.setParameter("street", street);
-		query.setParameter("postcode", postcode);
-		query.setParameter("city", city);
-		query.setParameter("country", country);
-		if (phones != null) query.setParameter("phones", phones);
-		if (recipeIds != null) query.setParameter("recipes", recipeIds);
-		if (ingredientTypeIds != null) query.setParameter("ingredientTypes", ingredientTypeIds);
+		if (resultOffset != null) query.setFirstResult(resultOffset);
+		if (resultSize != null) query.setMaxResults(resultSize);
+		
+		final List<Person> people = query
+			.setParameter("minCreated", minCreated)
+			.setParameter("maxCreated", maxCreated)
+			.setParameter("minModified", minModified)
+			.setParameter("maxModified", maxModified)
+			.setParameter("email", email)
+			.setParameter("group", group)
+			.setParameter("title", title)
+			.setParameter("givenName", givenName)
+			.setParameter("familyName", familyName)
+			.setParameter("street", street)
+			.setParameter("postcode", postcode)
+			.setParameter("city", city)
+			.setParameter("country", country)
+			.getResultList()
+			.stream()
+			.map(identity -> entityManager.find(Person.class, identity))
+			.filter(Objects::nonNull)
+			.sorted(PERSON_COMPARATOR)
+			.collect(Collectors.toList());
 
-
-		final List<Person> people = query.getResultList().stream()
-				.map(identity -> entityManager.find(Person.class, identity)).filter(type -> type != null)
-				.sorted((p1, p2) -> {
-					// Compare by family name, then given name, then email
-					int familyComparison = p1.getName().getFamily().compareToIgnoreCase(p2.getName().getFamily());
-					if (familyComparison != 0) {
-						return familyComparison;
-					}
-					int givenComparison = p1.getName().getGiven().compareToIgnoreCase(p2.getName().getGiven());
-					if (givenComparison != 0) {
-						return givenComparison;
-					}
-					return p1.getEmail().compareToIgnoreCase(p2.getEmail());
-				}).collect(Collectors.toList());
-
-		return people.toArray(new Person[0]);
+		return people.toArray(Person[]::new);
 	}
 
 	/**
@@ -127,22 +111,25 @@ public class PersonService {
 	 * person from template data within the HTTP request body. It creates a new
 	 * person if the given template's identity is zero, which solely admins may
 	 * perform. Otherwise it updates the corresponding person with the given
-	 * template data, which only adminstrators or the person itself may perform.
+	 * template data, which only administrators or the person itself may perform.
 	 * Make sure non-administrators cannot upgrade their group. The default avatar
 	 * with ID 1 shall be associated during creation if none is provided.
 	 * Optionally, a new password may be set using the header field
 	 * “X-Set-Password”. Returns the affected person's identity as text/plain. Only
-	 * Admintrators or the given person may perform this operation.
+	 * Administrators or the given person may perform this operation.
 	 */
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.TEXT_PLAIN)
-	public long createOrUpdatePerson(@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
-			@NotNull @Valid final Person personTemplate, @HeaderParam("X-Set-Password") final String newPassword) {
+	public long createOrUpdatePerson(
+			@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
+			@NotNull @Valid final Person personTemplate, 
+			@HeaderParam("X-Set-Password") @Size(min=1) final String newPassword
+	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final Person requester = entityManager.find(Person.class, requesterIdentity);
-		if (requester == null)
-			throw new ClientErrorException(Status.FORBIDDEN);
+		
+		if (requester == null) throw new ClientErrorException(Status.FORBIDDEN);
 		final boolean insertMode = personTemplate.getIdentity() == 0L;
 
 		final Person person;
@@ -150,52 +137,42 @@ public class PersonService {
 
 		if (insertMode) {
 			person = new Person();
-			person.setModified(System.currentTimeMillis());
-			avatar = entityManager.find(Document.class,
-					personTemplate.getAvatar() == null ? 1L : personTemplate.getAvatar().getIdentity());
+			avatar = entityManager.find(Document.class, personTemplate.getAvatar() == null ? 1L : personTemplate.getAvatar().getIdentity());
+			if (avatar == null) throw new IllegalStateException();
 		} else {
 			person = entityManager.find(Person.class, personTemplate.getIdentity());
-			if (person == null)
-				throw new ClientErrorException(Status.NOT_FOUND);
-			avatar = personTemplate.getAvatar() == null ? person.getAvatar()
-					: entityManager.find(Document.class, personTemplate.getAvatar().getIdentity());
+			avatar = personTemplate.getAvatar() == null ? person.getAvatar() : entityManager.find(Document.class, personTemplate.getAvatar().getIdentity());
+			if (avatar == null) throw new ClientErrorException(Status.NOT_FOUND);
 		}
 
-		if (requester.getGroup() != Group.ADMIN && person != requester)
-			throw new ClientErrorException(Status.FORBIDDEN);
-		if (avatar == null)
-			throw new ClientErrorException(Status.NOT_FOUND);
+		if (requester.getGroup() != Group.ADMIN && person != requester) throw new ClientErrorException(Status.FORBIDDEN);
 
 		person.setModified(System.currentTimeMillis());
 		person.setVersion(personTemplate.getVersion());
 		person.setEmail(personTemplate.getEmail());
-		if (newPassword != null && (requester.getGroup() == Group.ADMIN || person == requester)) {
-			person.setPasswordHash(newPassword);
-		} else {
-			person.setPasswordHash(personTemplate.getPasswordHash());
-		}
-		if (requester.getGroup() == Group.ADMIN) {
-			person.setGroup(personTemplate.getGroup());
-		}
 		person.setAvatar(avatar);
+		person.getName().setTitle(personTemplate.getName().getTitle());
+		// TODO: insert name, address and phone number
+		
+		if (newPassword != null) person.setPasswordHash(newPassword);
+	
+		if (requester.getGroup() == Group.ADMIN) person.setGroup(personTemplate.getGroup());
 
 		entityManager.getTransaction().begin();
 		try {
 			if (insertMode) {
 				entityManager.persist(person);
 			} else {
-				entityManager.merge(person);
+				entityManager.flush();
 			}
 			entityManager.getTransaction().commit();
 		} catch (final Exception e) {
-			if (entityManager.getTransaction().isActive())
-				entityManager.getTransaction().rollback();
+			if (entityManager.getTransaction().isActive()) entityManager.getTransaction().rollback();
 			throw new ClientErrorException(Status.CONFLICT, e);
 		}
-
-		final Cache secondLevelCache = entityManager.getEntityManagerFactory().getCache();
-		if (insertMode)
-			secondLevelCache.evict(Person.class, requester.getIdentity());
+		
+		// if persons are inserted or updated, we don't need to care about the second level cache
+		// because no mirror relationships changed
 
 		return person.getIdentity();
 	}
@@ -211,8 +188,10 @@ public class PersonService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.TEXT_PLAIN)
 	@Path("{id}")
-	public long deletePerson(@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
-			@PathParam("id") @Positive final long personIdentity) {
+	public long deletePerson(
+			@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
+			@PathParam("id") @Positive final long personIdentity
+	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 
 		final Person requester = entityManager.find(Person.class, requesterIdentity);
