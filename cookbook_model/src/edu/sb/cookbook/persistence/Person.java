@@ -133,7 +133,7 @@ public class Person extends BaseEntity {
 		this.email = email;
 	}
 	
-	@JsonbProperty
+	@JsonbTransient
 	public String getPasswordHash () {
 		return this.passwordHash;
 	}
