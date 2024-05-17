@@ -91,13 +91,18 @@ public class Recipe extends BaseEntity {
 	}
 	
 	
-	@JsonbTransient
+	@JsonbProperty
 	public Document getAvatar () {
 		return this.avatar;
 	}
 	
 	public void setAvatar (final Document avatar) {
 		this.avatar = avatar;
+	}
+	
+	@JsonbProperty
+	protected Long getOwnerReference(){
+		return this.owner == null ? null : this.owner.getIdentity();
 	}
 	
 	@JsonbTransient
@@ -107,6 +112,11 @@ public class Recipe extends BaseEntity {
 	
 	public void setOwner (final Person owner) {
 		this.owner = owner;
+	}
+	
+	@JsonbProperty
+	protected int getIngredientCount(){
+		return this.ingredients.size();
 	}
 	
 	@JsonbTransient
@@ -161,16 +171,6 @@ public class Recipe extends BaseEntity {
 	
 	public void setInstruction (final String instruction) {
 		this.instruction = instruction;
-	}
-	
-	@JsonbProperty
-	protected Long getOwnerReference(){
-		return this.owner == null ? null : this.owner.getIdentity();
-	}
-	
-	@JsonbProperty
-	protected int getIngredientCount(){
-		return ingredients.toArray().length;
 	}
 	
 	@JsonbProperty
