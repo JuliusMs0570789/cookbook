@@ -276,7 +276,8 @@ public class PersonService {
 		final Person person = entityManager.find(Person.class, personIdentity);
 		if (person == null) throw new ClientErrorException(Status.NOT_FOUND);
 
-		List<Recipe> recipes = person.getRecipes().stream()
+		List<Recipe> recipes = person.getRecipes()
+				.stream()
 				.sorted((r1, r2) -> Long.compare(r1.getIdentity(), r2.getIdentity())).collect(Collectors.toList());
 
 		return recipes.toArray(Recipe[]::new);
@@ -297,8 +298,7 @@ public class PersonService {
 		final Person person = entityManager.find(Person.class, personIdentity);
 		if (person == null) throw new ClientErrorException(Status.NOT_FOUND);
 
-		List<IngredientType> ingredientTypes = person
-				.getIngredientTypes()
+		List<IngredientType> ingredientTypes = person.getIngredientTypes()
 				.stream()
 				.sorted((i1, i2) -> Long.compare(i1.getIdentity(), i2.getIdentity())).collect(Collectors.toList());
 
