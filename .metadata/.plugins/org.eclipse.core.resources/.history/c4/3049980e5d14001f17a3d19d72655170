@@ -2,7 +2,6 @@ package edu.sb.cookbook.service;
 
 import static edu.sb.cookbook.service.BasicAuthenticationReceiverFilter.REQUESTER_IDENTITY;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -226,9 +225,11 @@ public class RecipeService {
 		final Recipe recipe = entityManager.find(Recipe.class, recipeIdentity);
 		if (recipe == null) throw new ClientErrorException(Status.NOT_FOUND);
 		
+		
 		List<Ingredient> ingredients = recipe.getIngredients()
 				.stream()
 				.sorted((i1, i2) -> Long.compare(i1.getIdentity(), i2.getIdentity())).collect(Collectors.toList());
+
 		
 		return ingredients.toArray(Ingredient[]::new);
 	}
