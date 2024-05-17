@@ -201,14 +201,11 @@ public class PersonService {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 
 		final Person requester = entityManager.find(Person.class, requesterIdentity);
-		if (requester == null)
-			throw new ClientErrorException(Status.FORBIDDEN);
+		if (requester == null) throw new ClientErrorException(Status.FORBIDDEN);
 
 		final Person person = entityManager.find(Person.class, personIdentity);
-		if (person == null)
-			throw new ClientErrorException(Status.NOT_FOUND);
-		if (requester.getGroup() != Group.ADMIN && requester != person)
-			throw new ClientErrorException(Status.FORBIDDEN);
+		if (person == null) throw new ClientErrorException(Status.NOT_FOUND);
+		if (requester.getGroup() != Group.ADMIN && requester != person) throw new ClientErrorException(Status.FORBIDDEN);
 
 		try {
 		    entityManager.getTransaction().begin();
@@ -219,8 +216,7 @@ public class PersonService {
 		    entityManager.remove(person);
 		    entityManager.getTransaction().commit();
 		} catch (final Exception e) {
-		    if (entityManager.getTransaction().isActive())
-		        entityManager.getTransaction().rollback();
+		    if (entityManager.getTransaction().isActive()) entityManager.getTransaction().rollback();
 		    throw new ClientErrorException(Status.CONFLICT, e);
 		}
 
@@ -242,8 +238,7 @@ public class PersonService {
 	public Person findPerson(@PathParam("id") @Positive final long personIdentity) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final Person person = entityManager.find(Person.class, personIdentity);
-		if (person == null)
-			throw new ClientErrorException(Status.NOT_FOUND);
+		if (person == null) throw new ClientErrorException(Status.NOT_FOUND);
 
 		return person;
 	}
@@ -256,11 +251,12 @@ public class PersonService {
 	@GET
 	@Path("requester")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Person findRequester(@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity) {
+	public Person findRequester(
+			@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity
+	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final Person person = entityManager.find(Person.class, requesterIdentity);
-		if (person == null)
-			throw new ClientErrorException(Status.NOT_FOUND);
+		if (person == null) throw new ClientErrorException(Status.NOT_FOUND);
 
 		return person;
 	}
@@ -273,16 +269,17 @@ public class PersonService {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("{id}/recipes")
-	public Recipe[] getRecipes(@PathParam("id") @Positive final long personIdentity) {
+	public Recipe[] getRecipes(
+			@PathParam("id") @Positive final long personIdentity
+	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final Person person = entityManager.find(Person.class, personIdentity);
-		if (person == null)
-			throw new ClientErrorException(Status.NOT_FOUND);
+		if (person == null) throw new ClientErrorException(Status.NOT_FOUND);
 
 		List<Recipe> recipes = person.getRecipes().stream()
 				.sorted((r1, r2) -> Long.compare(r1.getIdentity(), r2.getIdentity())).collect(Collectors.toList());
 
-		return recipes.toArray(new Recipe[0]);
+		return recipes.toArray(Recipe[]::new);
 	}
 
 	/**
@@ -293,15 +290,18 @@ public class PersonService {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("{id}/ingredient-types")
-	public IngredientType[] getIngredientTypes(@PathParam("id") @Positive final long personIdentity) {
+	public IngredientType[] getIngredientTypes(
+			@PathParam("id") @Positive final long personIdentity
+	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final Person person = entityManager.find(Person.class, personIdentity);
-		if (person == null)
-			throw new ClientErrorException(Status.NOT_FOUND);
+		if (person == null) throw new ClientErrorException(Status.NOT_FOUND);
 
-		List<IngredientType> ingredientTypes = person.getIngredientTypes().stream()
+		List<IngredientType> ingredientTypes = person
+				.getIngredientTypes()
+				.stream()
 				.sorted((i1, i2) -> Long.compare(i1.getIdentity(), i2.getIdentity())).collect(Collectors.toList());
 
-		return ingredientTypes.toArray(new IngredientType[0]);
+		return ingredientTypes.toArray(IngredientType[]::new);
 	}
 }
