@@ -158,7 +158,10 @@ public class PersonService {
 		person.getAddress().setPostcode(personTemplate.getAddress().getPostcode());
 		person.getAddress().setCity(personTemplate.getAddress().getCity());
 		person.getAddress().setCountry(personTemplate.getAddress().getCountry());
-		// TODO: phone number
+
+
+		
+		// TODO: insert name, address and phone number
 		
 		if (newPassword != null) person.setPasswordHash(newPassword);
 	

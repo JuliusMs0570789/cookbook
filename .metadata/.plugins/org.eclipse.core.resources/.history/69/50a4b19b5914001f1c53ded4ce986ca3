@@ -154,11 +154,9 @@ public class PersonService {
 		person.getName().setTitle(personTemplate.getName().getTitle());
 		person.getName().setFamily(personTemplate.getName().getFamily());
 		person.getName().setGiven(personTemplate.getName().getGiven());
-		person.getAddress().setStreet(personTemplate.getAddress().getStreet());
-		person.getAddress().setPostcode(personTemplate.getAddress().getPostcode());
-		person.getAddress().setCity(personTemplate.getAddress().getCity());
-		person.getAddress().setCountry(personTemplate.getAddress().getCountry());
-		// TODO: phone number
+
+		
+		// TODO: insert name, address and phone number
 		
 		if (newPassword != null) person.setPasswordHash(newPassword);
 	

@@ -1,5 +1,4 @@
 INDEX VERSION 1.134+C:\Users\Lukas\!Media Programming\cookbook\.metadata\.plugins\org.eclipse.jdt.core
-3597534843.index
 2827274127.index
 3724071507.index
 218928688.index
