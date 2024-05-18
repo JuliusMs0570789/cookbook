@@ -1,10 +1,7 @@
 package edu.sb.cookbook.service;
 
 import static edu.sb.cookbook.service.BasicAuthenticationReceiverFilter.REQUESTER_IDENTITY;
-
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
+import java.util.Objects;
 import javax.persistence.Cache;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -26,11 +23,16 @@ import edu.sb.tool.RestJpaLifecycleProvider;
 @Path("recipes")
 public class RecipeService {
 	static private final String QUERY_RECIPES = "select recipe from Recipe as r where"
-			+ "(:lowerNumber is null or r.number >= :lowerNumber) and "
-			+ "(:upperNumber is null or r.number <= :upperNumber) and "
+			+ "(:minCreated is null or r.created >= :minCreated) and "
+			+ "(:maxCreated is null or r.created <= :maxCreated) and "
+			+ "(:minModified is null or r.modified >= :minModified) and "
+			+ "(:maxModified is null or r.modified <= :maxModified) and "
+			+ "(:category is null or r.category = :category) and "
 			+ "(:title is null or r.title = :title) and "
-			+ "(:description is null or r.description = :description) and "
-			+ "(:instruction is null or r.instruction like :instruction)";
+			+ "(:descriptionFragment is null or r.description like concat('%', :descriptionFragment, '%') and "
+			+ "(:instructionFragment is null or r.instruction like ('%', :instructionFragment, '%')) and "
+			+ "(:minIngredientCount is null or size(r.ingredients) >= :minIngredientCount) and "
+			+ "(:maxIngredientCount is null or size(r.ingredients) <= :maxIngredientCount)";
 	
 	/**
 	 * HTTP Signature: GET recipes IN: - OUT: application/json
@@ -40,11 +42,15 @@ public class RecipeService {
 	public Recipe[] queryRecipes (
 			@QueryParam("result-offset") @PositiveOrZero Integer resultOffset,
 			@QueryParam("result-limit") @PositiveOrZero Integer resultLimit,
-			@QueryParam("lower-number") final String lowerNumber,
-			@QueryParam("upper-number") final String upperNumber,
+			@QueryParam("min-created") final Long minCreated,
+			@QueryParam("max-created") final Long maxCreated,
+			@QueryParam("min-modified") final Long minModified,
+			@QueryParam("max-modified") final Long maxModified,
 			@QueryParam("title") final String title,
-			@QueryParam("description") final String description,
-			@QueryParam("instruction") final String instruction
+			@QueryParam("description-fragment") final String descriptionFragment,
+			@QueryParam("instruction-fragment") final String instructionFragment,
+			@QueryParam("min-ingredient-count") final String minIngredientCount,
+			@QueryParam("max-ingredient-count") final String maxIngredientCount
 	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final TypedQuery<Long> query = entityManager.createQuery(QUERY_RECIPES, Long.class);
@@ -53,20 +59,25 @@ public class RecipeService {
 		if (resultLimit != null) query.setMaxResults(resultLimit);
 		
 		final Recipe[] recipes = query
-				.setParameter("lowerNumber", lowerNumber)
-				.setParameter("upperNumber", upperNumber)
-				.setParameter("title", title)
-				.setParameter("description", description)
-				.setParameter("instruction", instruction)
-				.getResultList()
-				.stream()
-				.map(identity -> entityManager.find(Recipe.class, identity))
-				.filter(recipe -> recipe != null)
-				.sorted()
-				.toArray(Recipe[]::new);
+			.setParameter("minCreated", minCreated)
+			.setParameter("maxCreated", maxCreated)
+			.setParameter("minModified", minModified)
+			.setParameter("maxModified", maxModified)
+			.setParameter("title", title)
+			.setParameter("descriptionFragment", descriptionFragment)
+			.setParameter("instructionFragment", instructionFragment)
+			.setParameter("minIngredientCount", minIngredientCount)
+			.setParameter("maxgredientCount", maxIngredientCount)	
+			.getResultList()
+			.stream()
+			.map(identity -> entityManager.find(Recipe.class, identity))
+			.filter(Objects::nonNull)
+			.sorted()
+			.toArray(Recipe[]::new);
 
 		return recipes;
 	}
+	
 	
 	/**
 	 * HTTP Signature: POST recipes IN: application/json OUT: text/plain
@@ -92,14 +103,15 @@ public class RecipeService {
 			recipe = new Recipe();
 			recipe.setOwner(requester);
 			avatar = entityManager.find(Document.class, recipeTemplate.getAvatar() == null ? 1L : recipeTemplate.getAvatar().getIdentity());
+			if (avatar == null) throw new IllegalStateException();
 		} else {
 			recipe = entityManager.find(Recipe.class, recipeTemplate.getIdentity());
 			if (recipe == null) throw new ClientErrorException(Status.NOT_FOUND);
 			avatar = recipeTemplate.getAvatar() == null ? recipe.getAvatar() : entityManager.find(Document.class, recipeTemplate.getAvatar().getIdentity());
+			if (avatar == null) throw new ClientErrorException(Status.NOT_FOUND);
 		}
 		
 		if (requester.getGroup() != Group.ADMIN && recipe.getOwner() != requester) throw new ClientErrorException(Status.FORBIDDEN);
-		if (avatar == null) throw new ClientErrorException(Status.NOT_FOUND);
 
 		recipe.setModified(System.currentTimeMillis());
 		recipe.setVersion(recipeTemplate.getVersion());
@@ -131,6 +143,7 @@ public class RecipeService {
 		return recipe.getIdentity();
 	}
 	
+	
 	/**
 	 * HTTP Signature: DELETE recipes/{id} IN: - OUT: text/plain
 	 * @param requesterIdentity the requester identity
@@ -153,7 +166,11 @@ public class RecipeService {
 		if (requester.getGroup() != Group.ADMIN && requester != recipe.getOwner()) throw new ClientErrorException(Status.FORBIDDEN);
 
 		try {
+			for(final Ingredient ingredient : recipe.getIngredients()) {
+				entityManager.remove(ingredient);
+			}
 			entityManager.remove(recipe);
+			
 			entityManager.getTransaction().commit();
 		} catch (final Exception e) {
 			if (entityManager.getTransaction().isActive())
@@ -166,11 +183,10 @@ public class RecipeService {
 		// 2nd level cache eviction if necessary
 		final Cache secondLevelCache = entityManager.getEntityManagerFactory().getCache();
 		secondLevelCache.evict(Person.class, requester.getIdentity());
-		secondLevelCache.evict(Ingredient.class);
-		secondLevelCache.evict(IngredientType.class);
 
 		return recipe.getIdentity();
 	}
+	
 	
 	/**
 	 * HTTP Signature: GET recipes/{id} IN: - OUT: application/json
@@ -190,37 +206,28 @@ public class RecipeService {
 		return recipe;
 	}
 	
+	
 	/**
 	 * HTTP Signature: GET recipes/{id}/illustrations IN: - OUT: application/json
 	 */
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("{id}/illustrations")
-	public Set<Document> getIllustrations (
+	public Document[] getIllustrations (
 		@PathParam("id") @Positive final long recipeIdentity
 	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final Recipe recipe = entityManager.find(Recipe.class, recipeIdentity);
 		if (recipe == null) throw new ClientErrorException(Status.NOT_FOUND);
 
-		return recipe.getIllustrations();
+		final Document[] illustrations = recipe.getIllustrations()
+				.stream()
+				.sorted()
+				.toArray(Document[]::new);
+		
+		return illustrations;
 	}
 	
-	/**
-	 * HTTP Signature: GET recipes/{id}/ingredients IN: - OUT: application/json
-	 */
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("{id}/ingredients")
-	public Set<Ingredient> getIngredients (
-		@PathParam("id") @Positive final long recipeIdentity
-	) {
-		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
-		final Recipe recipe = entityManager.find(Recipe.class, recipeIdentity);
-		if (recipe == null) throw new ClientErrorException(Status.NOT_FOUND);
-		
-		return recipe.getIngredients();
-	}
 	
 	/**
 	 * HTTP Signature: POST recipes/{id}/illustrations IN: application/json OUT: text/plain
@@ -234,7 +241,7 @@ public class RecipeService {
 	public long addIllustration (
 		@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
 		@PathParam("id") @Positive final long recipeIdentity,
-		@QueryParam("illustrations") final long[] documentIllustrations
+		@QueryParam("illustration") final Document illustrationTemplate
 	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final Person requester = entityManager.find(Person.class, requesterIdentity);
@@ -244,18 +251,20 @@ public class RecipeService {
 		if (recipe == null) throw new ClientErrorException(Status.NOT_FOUND);
 		if (requester.getGroup() != Group.ADMIN && requester != recipe.getOwner()) throw new ClientErrorException(Status.FORBIDDEN);
 		
-		final Set<Document> illustrations = LongStream
-			.of(documentIllustrations)
-			.mapToObj(ref -> entityManager.find(Document.class, ref))
-			.filter(document -> document != null)
-			.collect(Collectors.toSet());
-		
-		recipe.getIllustrations().retainAll(illustrations);
-		recipe.getIllustrations().addAll(illustrations);
+		final Document illustration = entityManager.find(Document.class, illustrationTemplate.getIdentity());
+		if (illustration == null) throw new ClientErrorException(Status.NOT_FOUND);
 
+		recipe.setModified(System.currentTimeMillis());
+		recipe.getIllustrations().add(illustration);
+		
 		try {
 			entityManager.flush();
+			
 			entityManager.getTransaction().commit();
+		} catch (final Exception e) {
+			if (entityManager.getTransaction().isActive())
+				entityManager.getTransaction().rollback();
+			throw new ClientErrorException(Status.CONFLICT, e);
 		} finally {
 			entityManager.getTransaction().begin();
 		}
@@ -263,46 +272,6 @@ public class RecipeService {
 		return recipe.getIdentity();
 	}
 	
-	/**
-	 * HTTP Signature: POST recipes/{id}/ingredients IN: application/json OUT: text/plain
-	 * @param ingredient the ingredient
-	 * @return the recipe identity
-	 */
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.TEXT_PLAIN)
-	@Path("{id}/ingredients")
-	public long addIngredient (
-		@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
-		@PathParam("id") @Positive final long recipeIdentity,
-		@QueryParam("ingredients") final long[] ingredientsParam
-	) {
-		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
-		final Person requester = entityManager.find(Person.class, requesterIdentity);
-		if (requester == null) throw new ClientErrorException(Status.FORBIDDEN);
-		
-		final Recipe recipe = entityManager.find(Recipe.class, recipeIdentity);
-		if (recipe == null) throw new ClientErrorException(Status.NOT_FOUND);
-		if (requester.getGroup() != Group.ADMIN && requester != recipe.getOwner()) throw new ClientErrorException(Status.FORBIDDEN);
-		
-		final Set<Ingredient> ingredients = LongStream
-			.of(ingredientsParam)
-			.mapToObj(ref -> entityManager.find(Ingredient.class, ref))
-			.filter(ingredient -> ingredient != null)
-			.collect(Collectors.toSet());
-		
-		recipe.getIngredients().retainAll(ingredients);
-		recipe.getIngredients().addAll(ingredients);
-
-		try {
-			entityManager.flush();
-			entityManager.getTransaction().commit();
-		} finally {
-			entityManager.getTransaction().begin();
-		}
-		
-		return recipe.getIdentity();
-	}
 	
 	/**
 	 * HTTP Signature: DELETE recipes/{id1}/illustrations/{id2} IN: - OUT: text/plain
@@ -311,8 +280,8 @@ public class RecipeService {
 	 * @return the Recipe identity
 	 */
 	@DELETE
-	@Produces(MediaType.TEXT_PLAIN)
 	@Path("{id1}/illustrations/{id2}")
+	@Produces(MediaType.TEXT_PLAIN)
 	public long dissacociateIllustration (
 		@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
 		@PathParam("id1") @Positive final long recipeIdentity,
@@ -326,22 +295,107 @@ public class RecipeService {
 		if (recipe == null) throw new ClientErrorException(Status.NOT_FOUND);
 		if (requester.getGroup() != Group.ADMIN && requester != recipe.getOwner()) throw new ClientErrorException(Status.FORBIDDEN);
 		
-		long[] illustrationIds = recipe.getIllustrations().stream()
-                .mapToLong(Document::getIdentity)
-                .toArray();
-		
-		final Set<Document> illustrationsToKeep = LongStream
-				.of(illustrationIds)
-				.mapToObj(ref -> entityManager.find(Document.class, ref))
-				.filter(document -> document.getIdentity() != illustrationIdentity)
-				.collect(Collectors.toSet());
+		recipe.getIllustrations().removeIf(illustration -> illustration.getIdentity() == illustrationIdentity);
+	
+		try {
+			entityManager.flush();
 			
-			recipe.getIllustrations().retainAll(illustrationsToKeep);
-			recipe.getIllustrations().addAll(illustrationsToKeep);
-		
+			entityManager.getTransaction().commit();
+		} catch (final Exception e) {
+			if (entityManager.getTransaction().isActive())
+				entityManager.getTransaction().rollback();
+			throw new ClientErrorException(Status.CONFLICT, e);
+		} finally {
+			entityManager.getTransaction().begin();
+		}
 
 		return recipe.getIdentity();
 	}
+	
+	
+	/**
+	 * HTTP Signature: GET recipes/{id}/ingredients IN: - OUT: application/json
+	 */
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("{id}/ingredients")
+	public Ingredient[] getIngredients (
+		@PathParam("id") @Positive final long recipeIdentity
+	) {
+		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
+		final Recipe recipe = entityManager.find(Recipe.class, recipeIdentity);
+		if (recipe == null) throw new ClientErrorException(Status.NOT_FOUND);
+		
+		final Ingredient[] ingredients = recipe.getIngredients()
+				.stream()
+				.sorted()
+				.toArray(Ingredient[]::new);
+		
+		return ingredients;
+	}
+	
+	
+	/**
+	 * HTTP Signature: POST recipes/{id}/ingredients IN: application/json OUT: text/plain
+	 * @param ingredient the ingredient
+	 * @return the recipe identity
+	 */
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.TEXT_PLAIN)
+	@Path("{id}/ingredients")
+	public long insertOrUpdateIngredient (
+		@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
+		@PathParam("id") @Positive final long recipeIdentity,
+		@QueryParam("ingredients") @NotNull @Valid final Ingredient ingredientTemplate
+	) {
+		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
+		final Person requester = entityManager.find(Person.class, requesterIdentity);
+		if (requester == null) throw new ClientErrorException(Status.FORBIDDEN);
+		
+		final Recipe recipe = entityManager.find(Recipe.class, recipeIdentity);
+		if (recipe == null) throw new ClientErrorException(Status.NOT_FOUND);
+		if (requester.getGroup() != Group.ADMIN && requester != recipe.getOwner()) throw new ClientErrorException(Status.FORBIDDEN);
+		
+		final boolean insertMode = ingredientTemplate.getIdentity() == 0L;
+
+		final IngredientType ingredientType = entityManager.find(IngredientType.class, ingredientTemplate.getType().getIdentity());
+		if (ingredientType == null) throw new ClientErrorException(Status.NOT_FOUND);
+		
+		final Ingredient ingredient;
+		if (insertMode) {
+			ingredient = new Ingredient(recipe);
+		} else {
+			ingredient = entityManager.find(Ingredient.class, ingredientTemplate.getIdentity());
+			if(ingredient == null) throw new ClientErrorException(Status.NOT_FOUND);
+		}
+		
+		ingredient.setModified(System.currentTimeMillis());
+		ingredient.setVersion(ingredientTemplate.getVersion());
+		ingredient.setAmount(ingredientTemplate.getAmount());
+		ingredient.setUnit(ingredientTemplate.getUnit());
+		ingredient.setType(ingredientType);
+
+		try {
+			if (insertMode) entityManager.persist(ingredient);
+			else entityManager.flush();
+			
+			entityManager.getTransaction().commit();
+		} catch (final Exception e) {
+			if (entityManager.getTransaction().isActive())
+				entityManager.getTransaction().rollback();
+			throw new ClientErrorException(Status.CONFLICT, e);
+		} finally {
+			entityManager.getTransaction().begin();
+		}
+		
+		// 2nd level cache eviction if necessary
+		final Cache secondLevelCache = entityManager.getEntityManagerFactory().getCache();
+		if (insertMode) secondLevelCache.evict(Recipe.class, recipe.getIdentity());
+		
+		return recipe.getIdentity();
+	}
+	
 	
 	/**
 	 * HTTP Signature: DELETE recipes/{id1}/ingredients/{id2} IN: - OUT: text/plain
@@ -353,7 +407,7 @@ public class RecipeService {
 	public long removeIngredient (
 		@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
 		@PathParam("id1") @Positive final long recipeIdentity,
-		@PathParam("id2") @Positive final long illustrationIdentity
+		@PathParam("id2") @Positive final long ingredientIdentity
 	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final Person requester = entityManager.find(Person.class, requesterIdentity);
@@ -363,18 +417,23 @@ public class RecipeService {
 		if (recipe == null) throw new ClientErrorException(Status.NOT_FOUND);
 		if (requester.getGroup() != Group.ADMIN && requester != recipe.getOwner()) throw new ClientErrorException(Status.FORBIDDEN);
 		
-		long[] ingredientIds = recipe.getIngredients().stream()
-                .mapToLong(Ingredient::getIdentity)
-                .toArray();
+		recipe.getIngredients().removeIf(ingredient -> ingredient.getIdentity() == ingredientIdentity);
 		
-		final Set<Document> illustrationsToKeep = LongStream
-				.of(ingredientIds)
-				.mapToObj(ref -> entityManager.find(Document.class, ref))
-				.filter(document -> document.getIdentity() != illustrationIdentity)
-				.collect(Collectors.toSet());
+		try {
+			entityManager.flush();
 			
-			recipe.getIllustrations().retainAll(illustrationsToKeep);
-			recipe.getIllustrations().addAll(illustrationsToKeep);
+			entityManager.getTransaction().commit();
+		} catch (final Exception e) {
+			if (entityManager.getTransaction().isActive())
+				entityManager.getTransaction().rollback();
+			throw new ClientErrorException(Status.CONFLICT, e);
+		} finally {
+			entityManager.getTransaction().begin();
+		}
+		
+		// 2nd level cache eviction if necessary
+		final Cache secondLevelCache = entityManager.getEntityManagerFactory().getCache();
+		secondLevelCache.evict(Recipe.class, recipe.getIdentity());
 
 		return recipe.getIdentity();
 	}
