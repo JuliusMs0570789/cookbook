@@ -241,7 +241,7 @@ public class RecipeService {
 	public long addIllustration (
 		@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
 		@PathParam("id") @Positive final long recipeIdentity,
-		@QueryParam("illustration") final Document illustrationTemplate
+		@NotNull @Valid final Document illustrationTemplate
 	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final Person requester = entityManager.find(Person.class, requesterIdentity);
@@ -347,7 +347,7 @@ public class RecipeService {
 	public long insertOrUpdateIngredient (
 		@HeaderParam(REQUESTER_IDENTITY) @Positive final long requesterIdentity,
 		@PathParam("id") @Positive final long recipeIdentity,
-		@QueryParam("ingredients") @NotNull @Valid final Ingredient ingredientTemplate
+		@NotNull @Valid final Ingredient ingredientTemplate
 	) {
 		final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("local_database");
 		final Person requester = entityManager.find(Person.class, requesterIdentity);
